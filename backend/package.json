@@ -1,6 +1,7 @@
 {
-  "name": "backend",
+  "name": "trustchain-backend",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -18,5 +19,5 @@
     "debug": "^4.4.0",
     "nodemon": "^3.1.9"
   },
-  "packageManager": "yarn@4.5.2+sha224.c2e2e9ed3cdadd6ec250589b3393f71ae56d5ec297af11cec1eba3b4"
+  "packageManager": "yarn@4.1.1"
 }
