@@ -1,28 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { fetchProposals } from '../utils/ProposalUtils';
 import WalletConnectContext from '../context/WalletConnectContext';
+import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi';
 
 function GovernanceVoting() {
-    const [proposals, setProposals] = useState(); // Initialize as an empty array
+    const [proposals, setProposals] = useState();
     const [selectedProposal, setSelectedProposal] = useState(null);
-    const { accounts } = useContext(WalletConnectContext);
-    
+    const { web3modal, wagmiConfig } = useContext(WalletConnectContext);
+    const { address, isConnected } = useAccount(wagmiConfig);
+    const { connect } = useConnect(wagmiConfig);
+    const { disconnect } = useDisconnect(wagmiConfig);
+    const { signMessageAsync } = useSignMessage(wagmiConfig);
+
     useEffect(() => {
-        const rpcEndpoint = 'https://rpc.osmosis.zone'; // Replace with actual endpoint if needed
+        const rpcEndpoint = 'https://rpc.osmosis.zone';
         fetchProposals(rpcEndpoint)
             .then(setProposals)
             .catch(console.error);
-    },); // The empty dependency array ensures this runs only once on mount
+    },);
 
     const handleVote = async (proposalId, voteOption) => {
-        // Here you would use CosmJS to sign and broadcast a
-        // governance vote transaction to the Osmosis blockchain
-        console.log(`Voting on proposal ${proposalId} with option ${voteOption}`);
+        if (!isConnected) {
+            alert('Please connect your wallet to vote.');
+            return;
+        }
+
+        // Example: Sign a message (replace with actual voting transaction)
+        try {
+            const message = `Vote ${voteOption} on proposal ${proposalId}`;
+            const signature = await signMessageAsync({ message });
+            console.log('Vote Signature:', signature);
+
+            // Replace with actual CosmJS transaction signing and broadcasting
+            console.log(`Voting on proposal ${proposalId} with option ${voteOption}`);
+            // ... your CosmJS code here ...
+
+        } catch (error) {
+            console.error('Vote signing failed:', error);
+            alert('Vote signing failed.');
+        }
+    };
+
+    const handleConnect = () => {
+        web3modal.openModal();
+    };
+
+    const handleDisconnect = () => {
+        disconnect();
     };
 
     return (
         <div>
             <h3>Governance Proposals:</h3>
+            {isConnected ? (
+                <div>
+                    <p>Connected Address: {address}</p>
+                    <button onClick={handleDisconnect}>Disconnect</button>
+                </div>
+            ) : (
+                <button onClick={handleConnect}>Connect Wallet</button>
+            )}
             <ul>
                 {proposals.map((proposal) => (
                     <li key={proposal.id}>

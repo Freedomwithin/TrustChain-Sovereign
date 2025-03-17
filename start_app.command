@@ -1,17 +1,13 @@
 #!/bin/bash
 
-# Change directory to TrustChain
-cd /Users/jonathon/TrustChain
+# Define paths
+backend_path="/Users/jonathon/TrustChain/backend"
+frontend_path="/Users/jonathon/TrustChain/frontend"
 
-# Start backend server in a new terminal window
-osascript -e 'tell application "Terminal" to activate' -e 'tell application "Terminal" to do script "yarn dev" in selected tab of the front window' &
+# Open backend in a new Terminal window and execute command
+osascript -e 'tell application "Terminal" to do script "cd '$backend_path' && yarn start"'
 
-# Open new terminal windows in the respective directories
-open -a Terminal backend
-open -a Terminal frontend
+# Open frontend in a new Terminal window and execute command
+osascript -e 'tell application "Terminal" to do script "cd '$frontend_path' && yarn start"'
 
-# Wait for a short delay (e.g., 2 seconds)
-sleep 2
-
-# Start frontend server in a new terminal window
-osascript -e 'tell application "Terminal" to activate' -e 'tell application "Terminal" to do script "yarn start" in selected tab of the front window'
+echo "Backend and frontend servers are starting..."
