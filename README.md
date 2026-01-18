@@ -53,5 +53,3 @@ To get started with the project, follow these steps:
 Contributions are welcome! Please feel free to submit pull requests or open issues to contribute to the project.
 
 ## License
-
-[Add License Here] (e.g., MIT License)
