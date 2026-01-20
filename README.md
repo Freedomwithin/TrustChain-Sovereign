@@ -40,13 +40,21 @@ https://vimeo.com/1156328913?share=copy&fl=sv&fe=ci
 ## Why Fund TrustChain:
 
 -Live MVP today - beats 80% whitepaper-only applicants
+
 -Reputation gamifies Osmosis usage, drives retention
+
 -DID foundation ready for on-chain attestations
+
 -Production quality - mobile-ready, auto-deployed, zero bugs
+
 -Next Milestones (with grant funding)
+
 -Real on-chain reputation contracts (testnet → mainnet)
+
 -Multi-wallet support (Keplr, Leap, Cosmostation)
+
 -Social reputation feeds (IBC cross-chain)
+
 -Mobile app (React Native + Expo)
 
 ## Team
