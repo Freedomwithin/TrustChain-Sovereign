@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+.reputation-card {
+  backdrop-filter: blur(20px);
+}
+.loading {
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+}
+

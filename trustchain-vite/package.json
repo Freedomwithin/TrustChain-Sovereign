@@ -13,6 +13,7 @@
     "@chain-registry/osmosis": "^1.67.149",
     "@wagmi/core": "^3.2.2",
     "@web3modal/ethereum": "^2.7.1",
+    "@web3modal/html": "^2.7.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "viem": "^2.44.4"
