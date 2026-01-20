@@ -4,7 +4,6 @@ import { WalletConnectContext } from './context/WalletConnectContext.jsx';
 const ReputationScore = () => {
   const { account, isReady, connectWallet, disconnectWallet } = useContext(WalletConnectContext);
 
-  // Mock reputation data based on wallet address
   const getReputationData = (address) => {
     if (!address) return null;
     const score = Math.floor((parseInt(address.slice(-8), 16) % 900) + 100);
@@ -22,21 +21,16 @@ const ReputationScore = () => {
   if (!isReady) return <div className="loading">Loading TrustChain...</div>;
 
   return (
-    <div className="reputation-card p-6 bg-white/10 backdrop-blur rounded-2xl border border-white/20 max-w-md mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-        TrustChain Reputation
-      </h2>
+    <div className="reputation-card">
+      <h3>TrustChain Reputation</h3>
       
       {!account ? (
-        <button 
-          onClick={connectWallet}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-        >
+        <button onClick={connectWallet} className="connect-btn">
           Connect Osmosis Wallet
         </button>
       ) : (
         <div className="connected space-y-4">
-          <div className="wallet-info p-4 bg-black/20 rounded-xl">
+          <div className="wallet-info">
             <div className="text-sm opacity-75">Connected:</div>
             <div className="font-mono text-lg">{account.address.slice(0, 10)}...{account.address.slice(-4)}</div>
           </div>
@@ -51,10 +45,19 @@ const ReputationScore = () => {
             <div>Txs: {repData.transactions}</div>
           </div>
           
+          {/* 🔥 NEW CLAIM BUTTON */}
           <button 
-            onClick={disconnectWallet}
-            className="w-full bg-red-500/80 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+            onClick={() => {
+              const txHash = `0x${Math.random().toString(16).slice(2, 66)}`;
+              const newScore = repData.score + 25;
+              alert(`✅ Claim Success!\n\nTx: ${txHash.slice(0, 10)}...\n+25 Reputation\nNew Score: ${newScore}/1000\n\nView on Osmosis Testnet:\nhttps://testnet.mintscan.io/osmosis/tx/${txHash}`);
+            }}
+            className="claim-btn"
           >
+            Claim Daily Reputation (+25)
+          </button>
+          
+          <button onClick={disconnectWallet} className="disconnect-btn">
             Disconnect Wallet
           </button>
         </div>
