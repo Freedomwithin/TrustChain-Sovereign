@@ -29,10 +29,11 @@ npm run dev
 ```
 
 ## Screenshots
-(<TrustChain Demo Image.png>)
+(<img width="1901" height="1075" alt="TrustChain Demo Image" src="https://github.com/user-attachments/assets/1873653d-fe73-46ae-812a-0781f7e679c8" />
+
 
 ## Video Demo
-<video controls src="TrustChain Demo Video.mp4" title="Title"></video>
+https://vimeo.com/1156328913?share=copy&fl=sv&fe=ci
 
 ## Osmosis Grant Value - Stage 1 Ready ($25K-$50K potential)
 
