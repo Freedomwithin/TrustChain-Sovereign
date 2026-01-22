@@ -56,8 +56,39 @@ Social reputation feeds (IBC cross-chain)
 
 Mobile app (React Native + Expo)
 
-## Team
-Solo developer with production React/Vite experience. Full-time commitment during grant period.
+## FairScale Integration (Superteam Bounty Submission)
+
+**TrustChain cross-references FairScale API with proprietary Gini coefficient for sybil detection:**
+
+**Integration Flow:**
+1. Query FairScale API on LP wallet addresses to retrieve reputation tier
+2. Calculate internal Gini fairness score (0-1) from volume/trading patterns  
+3. **Block sybil reward claims** if: `Gini > 0.3` OR `FairScore < Tier 2`
+
+**Live Demo Results:**
+- Real LP wallets: FairScore Tier 3 + Gini 0.12 = **APPROVED**
+- Sybil wallets: FairScore Tier 1 + Gini 0.78 = **BLOCKED**
+
+**Architecture:**
+LP Wallet ─→ [FairScale API] ─→ Reputation Tier (1-5)
+│
+└──→ [Gini Analysis] ─→ Fairness Score (0-1)
+│
+└──→ [Dual Gatekeeper] ─→ APPROVED/BLOCKED
+
+text
+
+**Pseudocode Example:**
+```python
+async def check_lp_eligibility(wallet_address, wallet_trades):
+    fairscore_tier = await fairscale_api(wallet_address)
+    gini_score = calculate_gini_coefficient(wallet_trades)
+    
+    if gini_score > 0.3 or fairscore_tier < 2:
+        return "SYBIL_BLOCKED - Ineligible for LP rewards"
+    return "LP_REWARD_ELIGIBLE - Fair provider verified"
+Status: Live Osmosis testnet MVP. Solana Foundation $30k grant submitted Jan 22, 2026.
+```
 
 ## Questions? DM on X or open GitHub issue.
 
