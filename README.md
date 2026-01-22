@@ -1,6 +1,8 @@
 # TrustChain - Osmosis Reputation System
 
-**Live Demo**: [https://trust-chain-frontend-ci2q.vercel.app/](https://trust-chain-frontend-9346.vercel.app/)
+<p align="center"><strong>Live Demo — click the image below</strong></p>
+
+[![TrustChain Demo Image](https://github.com/user-attachments/assets/1873653d-fe73-46ae-812a-0781f7e679c8)](https://trust-chain-frontend-9346.vercel.app/)
 
 ## What It Does
 TrustChain transforms Osmosis from a DEX into a trust network. Users connect wallets, earn reputation through daily claims, and build verifiable trust scores that power DeFi interactions. No more anonymous trading - reputation becomes your on-chain identity.
@@ -27,10 +29,6 @@ cd trustchain-vite
 npm install
 npm run dev
 ```
-
-## Screenshots
-(<img width="1901" height="1075" alt="TrustChain Demo Image" src="https://github.com/user-attachments/assets/1873653d-fe73-46ae-812a-0781f7e679c8" />
-
 
 ## Video Demo
 https://vimeo.com/1156328913?share=copy&fl=sv&fe=ci
