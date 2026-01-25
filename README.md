@@ -1,4 +1,4 @@
-# TrustChain - Osmosis Reputation System
+# TrustChain - Reputation System
 
 <p align="center">
   <a href="https://trust-chain-frontend-ci2q.vercel.app/">Click Here - Live Demo</a>
