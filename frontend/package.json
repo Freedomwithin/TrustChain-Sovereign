@@ -1,9 +1,9 @@
 {
   "name": "trustchain-frontend",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "dependencies": {
-    "@chain-registry/osmosis": "^1.67.89",
+    "@chain-registry/osmosis": "^1.67.149",
     "@cosmjs/amino": "^0.33.0",
     "@cosmjs/cosmwasm-stargate": "^0.33.0",
     "@cosmjs/crypto": "^0.33.0",
@@ -50,12 +50,13 @@
     "@testing-library/jest-dom": "6.4.2",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.0.0",
-    "ajv": "^6.12.6",
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
     "webpack": "^5.98.0",
     "webpack-bundle-analyzer": "^4.10.2"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "craco start",
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject"

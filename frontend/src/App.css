@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  padding: 50px;
 }
 
 .App-logo {
@@ -36,3 +37,21 @@
     transform: rotate(360deg);
   }
 }
+
+.badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 10px;
+  display: inline-block;
+}
+
+.risk-green { background: #10b981; color: white; }
+.risk-orange { background: #f59e0b; color: white; }
+.risk-red { background: #ef4444; color: white; }
+.loading { background: #6b7280; color: white; }
+
+h1 { color: #333; }
+h2 { color: #666; }
+

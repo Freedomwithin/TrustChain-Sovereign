@@ -67,6 +67,32 @@ app.get('/users/:address/reputation', async (req, res) => {
     res.json({ score: 100 });
 });
 
+// API endpoint to get pool integrity scores
+app.get('/api/pool/:id/integrity', async (req, res) => {
+  const poolId = req.params.id;
+  const mockEvents = [
+    { wallet: "sybil1", poolId, timestamp: 1, amount: 1000, type: "add" },
+    { wallet: "sybil1", poolId, timestamp: 2, amount: -1000, type: "remove" },
+    { wallet: "heroLP", poolId, timestamp: 1, amount: 100, type: "add" },
+    { wallet: "heroLP", poolId, timestamp: 3600, amount: 50, type: "add" }
+  ];
+  
+  // ✅ MOVE IMPORT HERE (inside async function)
+  const integrityModule = await import('./integrityEngine.ts');
+  console.log('IMPORT:', Object.keys(integrityModule)); // Debug
+  
+  const calculateIntegrity = integrityModule.calculateIntegrity || 
+                           integrityModule.default?.calculateIntegrity ||
+                           integrityModule.default;
+  
+  if (typeof calculateIntegrity !== 'function') {
+    return res.status(500).json({ error: 'calculateIntegrity not found', module: integrityModule });
+  }
+  
+  const scores = await calculateIntegrity(poolId, mockEvents);
+  res.json(scores);
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);

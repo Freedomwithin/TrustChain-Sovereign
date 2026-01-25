@@ -1,14 +1,15 @@
+/* eslint-disable no-unused-vars */
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { Web3Modal } from '@web3modal/html';
-import {
-  createConfig,
-  getAccount,
-  watchAccount,
-  reconnect,
-  disconnect,
-} from '@wagmi/core';
-import { osmosis } from '@chain-registry/osmosis';
+// import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
+// import { Web3Modal } from '@web3modal/html';
+// import {
+//   createConfig,
+//   getAccount,
+//   watchAccount,
+//   reconnect,
+//   disconnect,
+// } from '@wagmi/core';
+// import { osmosis } from '@chain-registry/osmosis';
 
 const WalletConnectContext = createContext();
 
@@ -22,33 +23,34 @@ export const WalletConnectProvider = ({ children }) => {
     const initializeWalletConnect = async () => {
       try {
         const projectId = 'cae6286b4e1c3e58da733fbb9eb457ce';
-        const chains = [osmosis];
+        // const chains = [osmosis];
 
-        const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);
-        const config = createConfig({
-          autoConnect: true,
-          connectors: w3mConnectors({ projectId, chains }),
-          publicClient,
-        });
+        // const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);
+        // const config = createConfig({
+        //   autoConnect: true,
+        //   connectors: w3mConnectors({ projectId, chains }),
+        //   publicClient,
+        // });
 
-        const ethereumClient = new EthereumClient(config, chains);
-        const modal = new Web3Modal({ projectId }, ethereumClient);
+        // const ethereumClient = new EthereumClient(config, chains);
+        // const modal = new Web3Modal({ projectId }, ethereumClient);
 
-        setWagmiConfig(config);
-        setWeb3Modal(modal);
+        // setWagmiConfig(config);
+        // setWeb3Modal(modal);
 
-        await reconnect(config);
-        const currentAccount = getAccount(config);
-        setAccount(currentAccount);
+        // await reconnect(config);
+        // const currentAccount = getAccount(config);
+        // setAccount(currentAccount);
 
-        const unwatch = watchAccount(config, {
-          onChange(nextAccount) {
-            setAccount(nextAccount);
-          },
-        });
+        // const unwatch = watchAccount(config, {
+        //   onChange(nextAccount) {
+        //     setAccount(nextAccount);
+        //   },
+        // });
 
+        // TEMP DISABLED - Focus on Integrity Badge Demo
         setIsReady(true);
-        return () => unwatch?.();
+        return () => {};
       } catch (error) {
         console.error('WalletConnect init failed:', error);
         setIsReady(true);
@@ -58,24 +60,14 @@ export const WalletConnectProvider = ({ children }) => {
     initializeWalletConnect();
   }, []);
 
-  const connectWallet = useCallback(async () => {
-    if (!web3modal || !wagmiConfig) return;
-    try {
-      await web3modal.openModal();
-    } catch (error) {
-      console.error('Connect error:', error);
-    }
-  }, [web3modal, wagmiConfig]);
+  // EMPTY FUNCTIONS - Wallet disabled for badge demo
+  const connectWallet = useCallback(() => {
+    console.log('Wallet disabled - demo mode');
+  }, []);
 
-  const disconnectWallet = useCallback(async () => {
-    if (!wagmiConfig) return;
-    try {
-      await disconnect(wagmiConfig);
-      setAccount(null);
-    } catch (error) {
-      console.error('Disconnect error:', error);
-    }
-  }, [wagmiConfig]);
+  const disconnectWallet = useCallback(() => {
+    console.log('Wallet disabled - demo mode');
+  }, []);
 
   const value = {
     wagmiConfig,
