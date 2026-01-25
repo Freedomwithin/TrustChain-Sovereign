@@ -70,7 +70,7 @@ function calculateWindowPersistence(
 ): number {
   // Penalize: enter+exit same window
   // Reward: continuous presence across window
-  const sessions: Record<string, {start: number, end: number}[]> = {};
+  const sessions: Record<string, {start: number, end: number | null}[]> = {}; // ✅ FIXED: | null
   
   for (const event of events) {
     const wallet = event.wallet;
@@ -78,11 +78,11 @@ function calculateWindowPersistence(
     
     const lastSession = sessions[wallet][sessions[wallet].length - 1];
     if (event.type === 'add') {
-      if (!lastSession || lastSession.end) {
+      if (!lastSession || lastSession.end !== undefined) { // ✅ FIXED: !== undefined
         sessions[wallet].push({ start: event.timestamp, end: null });
       }
     } else { // remove
-      if (lastSession && !lastSession.end) {
+      if (lastSession && lastSession.end === null) { // ✅ FIXED: === null
         lastSession.end = event.timestamp;
       }
     }
@@ -94,7 +94,7 @@ function calculateWindowPersistence(
   
   for (const walletSessions of Object.values(sessions)) {
     for (const session of walletSessions) {
-      if (session.end) {
+      if (session.end !== null) { // ✅ FIXED: !== null
         const duration = session.end - session.start;
         const normalized = Math.min(duration / windowSize, 1);
         totalPersistence += normalized > 0.1 ? normalized : 0; // ignore dust churn
