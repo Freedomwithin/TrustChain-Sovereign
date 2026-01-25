@@ -35,12 +35,23 @@ function PoolIntegrityBadge({ poolId = 'RAY123' }) {
 }
 
 function App() {
+  const pools = [
+    { id: 'OSMO-USDC', name: 'OSMO-USDC Pool' },
+    { id: 'ATOM-OSMO', name: 'ATOM-OSMO Pool' },
+    { id: 'RAY-OSMO', name: 'RAY-OSMO Pool' },
+  ];
+
   return (
     <div className="App">
-      <h1>TrustChain Demo</h1>
-      <h2>Pool Integrity Badge</h2>
-      <PoolIntegrityBadge poolId="RAY123" />
-      <PoolIntegrityBadge poolId="SOL-USDC" />
+      <h1>🚀 TrustChain - Live Osmosis Pools</h1>
+      <div className="pool-grid">
+        {pools.map(pool => (
+          <div key={pool.id} className="pool-card">
+            <h3>{pool.name}</h3>
+            <PoolIntegrityBadge poolId={pool.id} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

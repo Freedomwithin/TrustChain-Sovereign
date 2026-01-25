@@ -6,7 +6,7 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node server.js",
+    "start": "tsx server.js",
     "dev": "tsx server.js",
     "test": "tsx test.ts",
     "test:engine": "tsx test.ts"
