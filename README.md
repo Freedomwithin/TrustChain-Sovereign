@@ -6,7 +6,7 @@
 
 **Frontend Demo:** localhost:3000 (screenshot below)
 
-![3-pool dashboard screenshot](./frontend/public/assets/TrustChain3.0.png)
+![3-pool dashboard screenshot](frontend/public/assets/TrustChain4.png)
 
 ## Live Fullstack Demo (January 25, 2026)
 
