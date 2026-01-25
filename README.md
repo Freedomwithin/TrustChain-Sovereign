@@ -8,7 +8,7 @@
 
 <div align="center">
 
-**TrustChain current fullstack**
+**TrustChain Current Fullstack**
 
 </div>
 
