@@ -13,13 +13,6 @@
 ✅ **Backend:** https://trustchainfairtradeintegration.vercel.app/ [Production Vercel]  
 ✅ **Frontend:** localhost:3000 [3-pool dashboard screenshot]
 
-**Example API endpoint:** `GET /`
-
-**Sample response:**
-
-```json
-{"message": "TrustChain Backend LIVE!"}
-```
 ## What It Does
 TrustChain adds a reputation and integrity layer that enables Osmosis to operate as a trust-aware DEX. Users connect wallets, earn reputation through daily claims, and build verifiable trust scores that power DeFi interactions. No more anonymous trading - reputation becomes your on-chain identity.
 
