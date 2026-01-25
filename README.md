@@ -1,8 +1,8 @@
 # TrustChain - Osmosis Reputation System
 
-**Live Demo**: [https://trust-chain-frontend-ci2q.vercel.app/](https://trust-chain-frontend-ci2q.vercel.app/)
+## Live Demo Video (Original Concept)
+**See updated screenshot above for current live fullstack demo.**: [https://trust-chain-frontend-ci2q.vercel.app/](https://trust-chain-frontend-ci2q.vercel.app/)
 
-## Screenshots
 ![TrustChain Demo](./frontend/public/assets/TrustChain3.0.png)
 
 ## What It Does
