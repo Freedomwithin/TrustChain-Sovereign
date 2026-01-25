@@ -39,8 +39,6 @@ npm run dev
 ## Video Demo
 https://vimeo.com/1156328913?share=copy&fl=sv&fe=ci
 
-## Osmosis Grant Value - Stage 1 Ready ($25K-$50K potential)
-
 ## Why Fund TrustChain:
 
 - Live MVP today - beats 80% whitepaper-only applicants
