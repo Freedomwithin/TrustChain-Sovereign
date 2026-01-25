@@ -11,7 +11,7 @@
 <img width="1919" height="1079" alt="TrustChain Screen 3" src="https://github.com/user-attachments/assets/270f46ba-3223-41c7-a453-0f0156b73a59" />
 
 ## What It Does
-TrustChain upgrades Fairtrade from user reputation → **sybil-proof LP delegation.
+TrustChain upgrades Fairtrade from user reputation → sybil-proof LP delegation.
 
 Fairtrade scores individual traders. TrustChain verifies LP pools aren't 1 person gaming 100 fake wallets stealing Raydium's $10B TVL rewards.
 
