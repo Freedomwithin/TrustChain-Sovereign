@@ -1,13 +1,4 @@
-# TrustChain - FairTrade Intergation Reputation System
-# TrustChain - FairTrade Intergation Reputation System
-
-<div align="center">
-
-[Live Demo (Orginal Concept)](https://trust-chain-frontend-ci2q.vercel.app/)
-
-</div>
-
-<div align="center">
+# TrustChain - Fairtrade Reputation System
 
 **TrustChain Current Fullstack**
 
