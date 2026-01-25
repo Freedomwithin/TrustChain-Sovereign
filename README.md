@@ -1,20 +1,25 @@
-# TrustChain - Osmosis Reputation System
-
-<div align="center">
-
-[Live Demo (Orginal Concept)](https://trust-chain-frontend-ci2q.vercel.app/)
-
-</div>
-
-<div align="center">
+# TrustChain - FairTrade Intergation Reputation System
 
 **TrustChain Current Fullstack**
 
-</div>
+**Backend API (LIVE):** https://trustchainfairtradeintegration.vercel.app/
 
-![Live fullstack demo screenshot](./frontend/public/assets/TrustChain3.0.png)
+**Frontend Demo:** localhost:3000 (screenshot below)
 
+![3-pool dashboard screenshot](./frontend/public/assets/TrustChain3.0.png)
 
+## Live Fullstack Demo (January 25, 2026)
+
+✅ **Backend:** https://trustchainfairtradeintegration.vercel.app/ [Production Vercel]  
+✅ **Frontend:** localhost:3000 [3-pool dashboard screenshot]
+
+**Example API endpoint:** `GET /`
+
+**Sample response:**
+
+```json
+{"message": "TrustChain Backend LIVE!"}
+```
 ## What It Does
 TrustChain adds a reputation and integrity layer that enables Osmosis to operate as a trust-aware DEX. Users connect wallets, earn reputation through daily claims, and build verifiable trust scores that power DeFi interactions. No more anonymous trading - reputation becomes your on-chain identity.
 
@@ -38,7 +43,7 @@ TrustChain adds a reputation and integrity layer that enables Osmosis to operate
 TrustChain now runs as a **fully working fullstack system** with a live backend integrity API and a frontend risk indicator component.
 
 **Running locally:**
-- Backend API: `http://localhost:3001`
+- Backend API: https://trustchainfairtradeintegration.vercel.app/
 - Frontend UI: `http://localhost:3000`
 
 **Example API endpoint:**
