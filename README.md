@@ -1,4 +1,4 @@
-# TrustChain - Osmosis Reputation System
+# TrustChain - FairTrade Intergation Reputation System
 
 <div align="center">
 
