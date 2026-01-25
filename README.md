@@ -1,7 +1,7 @@
 # TrustChain - Reputation System
 
 <p align="center">
-  <a href="https://trust-chain-frontend-ci2q.vercel.app/">Click Here - Live Demo</a>
+  <a href="https://trust-chain-frontend-ci2q.vercel.app/">Click Here for the live demo</a>
 </p>
 
 <img width="1916" height="1078" alt="TrustChain Screen 1" src="https://github.com/user-attachments/assets/c49448c4-4b26-4556-82db-3797db92463e" />
