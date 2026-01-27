@@ -1,10 +1,8 @@
-# TrustChain - Fairtrade Reputation System
-
 **TrustChain Current Fullstack**
 
-**Backend API (LIVE):** https://trustchainfairtradeintegration.vercel.app/
+**Original Osmosis Build:** <a href="https://trust-chain-frontend-ci2q.vercel.app/" target="_blank">Live Demo</a>
 
-**Frontend Demo:** localhost:3000 (screenshot below)
+**Frontend Preiview FairTrade functional:**  (screenshot below)
 
 ![3-pool dashboard screenshot](frontend/public/assets/TrustChain4.png)
 
