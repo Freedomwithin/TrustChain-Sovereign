@@ -172,7 +172,8 @@ async def check_lp_eligibility(wallet_address, wallet_trades):
 Status: Live Osmosis testnet MVP. Solana Foundation $30k grant submitted Jan 22, 2026.
 ```
 
-## Questions? DM on X or open GitHub issue.
+
+## Questions or input? DM me here or <a href="https://x.com/FreedomWithin__/" target="_blank">send me a message on X<a>
 
 ## Contributing
 
