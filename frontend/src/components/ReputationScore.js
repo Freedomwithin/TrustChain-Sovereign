@@ -17,7 +17,7 @@ function ReputationScore() {
                 setError(null);
 
                 try {
-                    const response = await axios.get(`http://localhost:3001/users/${address}/reputation`);
+                    const response = await axios.get(`https://trust-chain-backend-1nixsz5ct-jonathon-koerners-projects.vercel.app/users/${address}/reputation`);
                     setScore(response.data.score);
                 } catch (e) {
                     if (e.response) {

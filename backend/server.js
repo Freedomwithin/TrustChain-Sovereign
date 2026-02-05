@@ -5,6 +5,9 @@ const app = express();
 const rpcEndpoint = 'https://rpc.osmosis.zone';
 const port = 3001;
 
+// Root route
+app.get('/', (req, res) => res.json({ status: 'TrustChain API Active' }));
+
 // Function to fetch a proposal by its ID
 const getProposal = async (proposalId) => {
     const client = await SigningCosmWasmClient.connect(rpcEndpoint);
