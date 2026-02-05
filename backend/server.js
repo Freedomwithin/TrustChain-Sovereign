@@ -2,8 +2,10 @@ const express = require('express');
 const { SigningCosmWasmClient } = require('@cosmjs/cosmwasm-stargate');
 const { StargateClient } = require('@cosmjs/stargate');
 const app = express();
-const rpcEndpoint = 'https://rpc.osmosis.zone';
-const port = 3001;
+
+// Use the Vercel Environment Variable, with a fallback for local dev
+const rpcEndpoint = process.env.OSMOSIS_RPC || 'https://rpc.osmosis.zone';
+const port = process.env.PORT || 3001;
 
 // Function to fetch a proposal by its ID
 const getProposal = async (proposalId) => {
