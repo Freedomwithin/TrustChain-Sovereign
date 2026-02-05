@@ -1,59 +1,37 @@
-import { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import './App.css';
-
-function PoolIntegrityBadge({ poolId = 'RAY123' }) {
-  const [integrity, setIntegrity] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`https://trust-chain-backend-1nixsz5ct-jonathon-koerners-projects.vercel.app/api/pool/${poolId}/integrity`)
-      .then(res => res.json())
-      .then(data => {
-        setIntegrity(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('API error:', err);
-        setLoading(false);
-      });
-  }, [poolId]);
-
-  if (loading) return <span className="badge loading">Analyzing...</span>;
-
-  const riskLevel = integrity?.extractivenessScore || 0;
-  const riskColor = riskLevel < 0.1 ? 'green' : riskLevel < 0.5 ? 'orange' : 'red';
-
-  return (
-    <span className={`badge risk-${riskColor}`}>
-      {riskLevel < 0.1 && 'LOW RISK ✓'}
-      {riskLevel < 0.5 && 'MEDIUM RISK ⚠️'} 
-      {riskLevel >= 0.5 && 'HIGH RISK 🚨'}
-      <br />
-      <small>Gini: {integrity?.giniScore?.toFixed(3) || 0}</small>
-    </span>
-  );
-}
+import WalletConnectContext from './context/WalletConnectContext';
+import ReputationScore from './components/ReputationScore';
+import TransactionHistory from './components/TransactionHistory';
+import GovernanceVoting from './components/GovernanceVoting';
+import { useAccount } from 'wagmi';
 
 function App() {
-  const pools = [
-    { id: 'OSMO-USDC', name: 'OSMO-USDC Pool' },
-    { id: 'ATOM-OSMO', name: 'ATOM-OSMO Pool' },
-    { id: 'RAY-OSMO', name: 'RAY-OSMO Pool' },
-  ];
+    const { web3modal, wagmiConfig } = useContext(WalletConnectContext);
+    const { address, isConnected } = useAccount(wagmiConfig);
 
-  return (
-    <div className="App">
-      <h1>🚀 TrustChain - Live Osmosis Pools</h1>
-      <div className="pool-grid">
-        {pools.map(pool => (
-          <div key={pool.id} className="pool-card">
-            <h3>{pool.name}</h3>
-            <PoolIntegrityBadge poolId={pool.id} />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+    const connectWallet = () => {
+        web3modal.openModal();
+    };
+
+    return (
+        <div className="App">
+            <header className="App-header">
+                <button onClick={connectWallet}>
+                    {isConnected ? 'Connected' : 'Connect Wallet'}
+                </button>
+                {isConnected && (
+                    <div>
+                        <h3>Connected Address:</h3>
+                        <p>{address}</p>
+                        <ReputationScore />
+                        <TransactionHistory transactions={[]} /> {/* Replace [] with your actual transactions */}
+                        <GovernanceVoting />
+                    </div>
+                )}
+            </header>
+        </div>
+    );
 }
 
 export default App;
