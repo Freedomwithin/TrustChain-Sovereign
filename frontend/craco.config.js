@@ -33,9 +33,8 @@ module.exports = {
       if (env === 'production') {
         webpackConfig.plugins.push(
           new BundleAnalyzerPlugin({
-            analyzerMode: 'server',
-            analyzerHost: '127.0.0.1',
-            analyzerPort: 8888,
+            analyzerMode: 'static',
+            openAnalyzer: false,
           })
         );
       }

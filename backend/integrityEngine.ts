@@ -1,4 +1,7 @@
-// integrityEngine.ts - TrustChain LP Integrity Engine v2.0.0
+/**
+ * TrustChain Integrity Engine
+ * Logic: Dual Gatekeeper (FairScale + Gini/HHI)
+ */
 
 export interface LiquidityEvent {
   wallet: string;
@@ -8,96 +11,69 @@ export interface LiquidityEvent {
   type: 'add' | 'remove';
 }
 
-export interface IntegrityScores {
-  giniScore: number;
-  persistenceScore: number;
-  extractivenessScore: number;
-}
+/**
+ * Calculates the Gini Coefficient to detect wealth/liquidity concentration.
+ * Range: 0 (Perfect Equality) to 1 (Total Inequality)
+ */
+export const calculateGini = (values: number[]): number => {
+  if (values.length < 2) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const n = sorted.length;
+  let sumOfAbsoluteDifferences = 0;
+  let sumOfValues = 0;
 
-// MAIN EXPORT
-export function calculateIntegrity(poolId: string, events: LiquidityEvent[]): IntegrityScores {
-  const contributions = computeWalletContributions(events);
-  const gini = computeGini(contributions);
-  const persistence = timeWeightedPersistence(events);
-  return {
-    giniScore: gini,
-    persistenceScore: persistence,
-    extractivenessScore: gini * (1 - persistence)
-  };
-}
-
-// ALL EXPORTS
-export function computeWalletContributions(events: LiquidityEvent[]): number[] {
-  const walletTotals: Record<string, number> = {};
-  for (const event of events) {
-    walletTotals[event.wallet] = (walletTotals[event.wallet] || 0) + event.amount;
-  }
-  return Object.values(walletTotals).filter(v => v > 0);
-}
-
-export function computeGini(contributions: number[]): number {
-  const n = contributions.length;
-  if (n < 2) return 0;
-  const sorted = [...contributions].sort((a, b) => a - b);
-  let sum = 0;
   for (let i = 0; i < n; i++) {
-    sum += sorted[i] * (2 * i - n + 1);
-  }
-  const total = sorted.reduce((a, b) => a + b, 0);
-  return total > 0 ? sum / (n * n * total) : 0;
-}
-
-export function timeWeightedPersistence(events: LiquidityEvent[]): number {
-  const windows = [1, 10, 3600];
-  let totalScore = 0;
-  let windowCount = 0;
-  for (const window of windows) {
-    const windowScore = calculateWindowPersistence(events, window);
-    totalScore += windowScore;
-    windowCount++;
-  }
-  return windowCount > 0 ? totalScore / windowCount : 0;
-}
-
-export function calculateWindowPersistence(events: LiquidityEvent[], windowSize: number): number {
-  const sessions: Record<string, { start: number; end: number | null }[]> = {};
-  for (const event of events) {
-    const wallet = event.wallet;
-    if (!sessions[wallet]) sessions[wallet] = [];
-    const lastSession = sessions[wallet][sessions[wallet].length - 1];
-    if (event.type === 'add') {
-      if (!lastSession || lastSession.end !== undefined) {
-        sessions[wallet].push({ start: event.timestamp, end: null });
-      }
-    } else {
-      if (lastSession && lastSession.end === null) {
-        lastSession.end = event.timestamp;
-      }
+    sumOfValues += sorted[i];
+    for (let j = 0; j < n; j++) {
+      sumOfAbsoluteDifferences += Math.abs(sorted[i] - sorted[j]);
     }
   }
 
-  let totalPersistence = 0;
-  let walletCount = 0;
-  for (const walletSessions of Object.values(sessions)) {
-    for (const session of walletSessions) {
-      if (session.end !== null) {
-        const duration = session.end - session.start;
-        const normalized = Math.min(duration / windowSize, 1);
-        totalPersistence += normalized > 0.1 ? normalized : 0;
-      }
-    }
-    walletCount++;
-  }
-  return walletCount > 0 ? totalPersistence / walletCount : 0;
-}
+  // Corrected math to avoid the "0.25" bug Jules found
+  return sumOfAbsoluteDifferences / (2 * n * sumOfValues);
+};
 
-// TEST DIRECTLY FROM ENGINE
-if (require.main === module) {
-  const events: LiquidityEvent[] = [
-    { wallet: "A", poolId: "test", timestamp: 1, amount: 1000, type: "add" },
-    { wallet: "A", poolId: "test", timestamp: 2, amount: -1000, type: "remove" },
-    { wallet: "B", poolId: "test", timestamp: 1, amount: 100, type: "add" },
-    { wallet: "B", poolId: "test", timestamp: 3600, amount: 50, type: "add" }
-  ];
-  console.log(calculateIntegrity("test", events));
-}
+/**
+ * Calculates HHI as a gas-efficient proxy for on-chain concentration.
+ */
+export const calculateHHI = (values: number[]): number => {
+  const total = values.reduce((acc, val) => acc + val, 0);
+  if (total === 0) return 0;
+
+  // HHI = Sum of squares of percentage shares
+  return values.reduce((acc, val) => {
+    const share = (val / total) * 100;
+    return acc + (share * share);
+  }, 0) / 10000; // Normalized 0-1
+};
+
+/**
+ * Dual Gatekeeper Logic
+ * Cross-references FairScale Tier with local Integrity Score
+ */
+export const checkLpEligibility = async (
+  fairScoreTier: number,
+  walletEvents: LiquidityEvent[]
+): Promise<{ eligible: boolean; reason?: string; gini: number }> => {
+
+  // 1. Calculate concentration based on current balances
+  const balances = walletEvents.reduce((acc: Record<string, number>, event) => {
+    acc[event.wallet] = (acc[event.wallet] || 0) + Math.abs(event.amount);
+    return acc;
+  }, {});
+
+  const gini = calculateGini(Object.values(balances));
+
+  // 2. Dual Gatekeeper Check (Referencing AGENT.md rules)
+  // Rule 1: FairScale Tier >= 2
+  // Rule 2: Gini <= 0.3
+  if (fairScoreTier < 2) {
+    return { eligible: false, reason: "FairScale Tier insufficient (Sybil risk)", gini };
+  }
+
+  if (gini > 0.3) {
+    return { eligible: false, reason: "Gini coefficient too high (Extractive behavior)", gini };
+  }
+
+  return { eligible: true, gini };
+};
