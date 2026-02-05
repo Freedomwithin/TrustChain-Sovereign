@@ -6,8 +6,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { WalletConnectProvider } from './context/WalletConnectContext'; // Corrected import
 
-window.Buffer = Buffer;
-window.process = { env: {} };
+window.Buffer = window.Buffer || Buffer;
+window.process = window.process || { env: {} };
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
