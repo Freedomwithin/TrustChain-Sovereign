@@ -1,9 +1,24 @@
 const express = require('express');
+const cors = require('cors');
 const { SigningCosmWasmClient } = require('@cosmjs/cosmwasm-stargate');
 const { StargateClient } = require('@cosmjs/stargate');
+
 const app = express();
+
+// Configuration
 const rpcEndpoint = 'https://rpc.osmosis.zone';
 const port = 3001;
+
+// 1. CORS Configuration - Allows your new Vercel Frontend to talk to this Backend
+app.use(cors({
+    origin: [
+        'https://trustchain-2-frontend.vercel.app',
+        'https://trust-chain-frontend-ci2q.vercel.app',
+        'http://localhost:3000'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 
 // Root route
 app.get('/', (req, res) => res.json({ status: 'TrustChain API Active' }));
@@ -34,14 +49,13 @@ const getTransactions = async (address) => {
         const transactions = await client.searchTx({ sentFromOrTo: address });
 
         const transformedTransactions = transactions.map(tx => {
-            const message = tx.tx.body.messages[0]; // Assuming a single message per transaction
+            const message = tx.tx.body.messages[0];
             return {
                 hash: tx.hash,
                 type: message.typeUrl,
                 timestamp: tx.timestamp,
-                amount: message.amount ? message.amount[0].amount : 'N/A', // Extract amount if available
-                fee: tx.tx.authInfo.fee.amount[0].amount, // Extract fee
-                // ... other relevant data
+                amount: message.amount ? message.amount[0].amount : 'N/A',
+                fee: tx.tx.authInfo.fee.amount[0].amount,
             };
         });
 
@@ -50,7 +64,7 @@ const getTransactions = async (address) => {
         console.error('Error fetching transactions:', error);
         throw new Error('Failed to fetch transactions');
     }
-}; 
+};
 
 // API endpoint to get transactions for an address
 app.get('/users/:address/transactions', async (req, res) => {
@@ -66,55 +80,46 @@ app.get('/users/:address/transactions', async (req, res) => {
 
 // API endpoint to get reputation score for an address (placeholder)
 app.get('/users/:address/reputation', async (req, res) => {
-    // TODO: Implement actual reputation calculation
     res.json({ score: 100 });
 });
 
 // Function to fetch real Osmosis pool data
 const fetchOsmosisPoolData = async (poolId) => {
-  try {
-    // Real Osmosis RPC endpoint
-    const client = await StargateClient.connect(rpcEndpoint);
-    
-    // Query LP events for pool (simplified)
-    // Real data would come from client.searchTx({ poolId })
-    const events = [
-      { wallet: "osmosis1abc...", poolId, timestamp: 1, amount: 1000, type: "add" },
-      { wallet: "osmosis1xyz...", poolId, timestamp: 2, amount: -500, type: "remove" },
-      { wallet: "osmosis1hero", poolId, timestamp: 3600, amount: 250, type: "add" },
-    ];
-    
-    return events;
-  } catch (error) {
-    console.log('Real data fetch failed, using fallback:', error);
-    // Fallback to working mock data
-    return [
-      { wallet: "sybil1", poolId, timestamp: 1, amount: 1000, type: "add" },
-      { wallet: "sybil1", poolId, timestamp: 2, amount: -1000, type: "remove" },
-      { wallet: "heroLP", poolId, timestamp: 1, amount: 100, type: "add" },
-      { wallet: "heroLP", poolId, timestamp: 3600, amount: 50, type: "add" }
-    ];
-  }
+    try {
+        const client = await StargateClient.connect(rpcEndpoint);
+        const events = [
+            { wallet: "osmosis1abc...", poolId, timestamp: 1, amount: 1000, type: "add" },
+            { wallet: "osmosis1xyz...", poolId, timestamp: 2, amount: -500, type: "remove" },
+            { wallet: "osmosis1hero", poolId, timestamp: 3600, amount: 250, type: "add" },
+        ];
+        return events;
+    } catch (error) {
+        console.log('Real data fetch failed, using fallback:', error);
+        return [
+            { wallet: "sybil1", poolId, timestamp: 1, amount: 1000, type: "add" },
+            { wallet: "sybil1", poolId, timestamp: 2, amount: -1000, type: "remove" },
+            { wallet: "heroLP", poolId, timestamp: 1, amount: 100, type: "add" },
+            { wallet: "heroLP", poolId, timestamp: 3600, amount: 50, type: "add" }
+        ];
+    }
 };
 
 // API endpoint to get pool integrity scores
 app.get('/api/pool/:id/integrity', async (req, res) => {
-  const poolId = req.params.id;
-  
-  // 🔥 REAL OSM/Raydium data
-  const realPoolEvents = await fetchOsmosisPoolData(poolId);
-  
-  const integrityModule = await import('./integrityEngine.ts');
-  const calculateIntegrity = integrityModule.calculateIntegrity || 
-                           integrityModule.default?.calculateIntegrity ||
-                           integrityModule.default;
-  
-  if (typeof calculateIntegrity !== 'function') {
-    return res.status(500).json({ error: 'calculateIntegrity not found', module: integrityModule });
-  }
-  
-  const scores = await calculateIntegrity(poolId, realPoolEvents);
-  res.json(scores);
+    const poolId = req.params.id;
+    const realPoolEvents = await fetchOsmosisPoolData(poolId);
+
+    const integrityModule = await import('./integrityEngine.ts');
+    const calculateIntegrity = integrityModule.calculateIntegrity ||
+        integrityModule.default?.calculateIntegrity ||
+        integrityModule.default;
+
+    if (typeof calculateIntegrity !== 'function') {
+        return res.status(500).json({ error: 'calculateIntegrity not found', module: integrityModule });
+    }
+
+    const scores = await calculateIntegrity(poolId, realPoolEvents);
+    res.json(scores);
 });
 
 // Start the server
