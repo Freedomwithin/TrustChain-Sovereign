@@ -1,19 +1,81 @@
-**TrustChain Current Fullstack**
+<div align="center"><h1>TrustChain Current Fullstack</h1></div>
 
-**Original Osmosis Build:** <a href="https://trust-chain-frontend-ci2q.vercel.app/" target="_blank">Live Demo</a>
-
-**Frontend Preiview FairTrade functional:**  (screenshot below)
+**Original Osmosis Build:** <a href="https://trust-chain-frontend-ci2q.vercel.app/" target="_blank">Live Demo</a> (functional screenshot below)
 
 ![3-pool dashboard screenshot](frontend/public/assets/TrustChain4.png)
 
-## Live Fullstack Demo (January 25, 2026)
+<div align="center"><h3 style="color:#1E3A8A;">My Agentic Workflow</h3></div>
 
-✅ **Backend:** https://trustchainfairtradeintegration.vercel.app/ [Production Vercel]  
-✅ **Frontend:** localhost:3000 [3-pool dashboard screenshot]
+```mermaid
+graph TD
+    User((Jonathon: Architect)) -->|Strategic Input| Gemini(Gemini 3 Pro: Central Intelligence)
+    
+    subgraph "The Agentic Swarm"
+        Gemini -->|Task Delegation| Jules[Jules: Agentic Coder]
+        Gemini -->|Recon & Research| Perplexity[Perplexity: Librarian]
+        Gemini -->|Logic/Security Audit| Claude[Claude: Pedantic Auditor]
+    end
 
+    Jules -->|Automated PRs| GitHub[(GitHub: freedomwithin/TrustChain)]
+    Perplexity -->|Live CVE Data| Gemini
+    Claude -->|Vulnerability Check| GitHub
+
+    subgraph "Core Project: TrustChain"
+        GitHub --> Osmosis[Osmosis DEX Integration]
+        GitHub --> FairScale[FairScale/Gini Logic]
+        GitHub --> Gatekeeper[Dual Gatekeeper Protocol]
+    end
+
+    %% Color Styling
+    classDef human fill:#1E3A8A,stroke:#3B82F6,stroke-width:3px,color:#fff;
+    classDef ai fill:#4C1D95,stroke:#8B5CF6,stroke-width:2px,color:#fff;
+    classDef core fill:#064E3B,stroke:#10B981,stroke-width:2px,color:#fff;
+    classDef githubStyle fill:#1E3A8A,stroke:#0366d6,stroke-width:2px,color:#fff;
+
+    class User human;
+    class Gemini,Jules,Perplexity,Claude ai;
+    class Osmosis,FairScale,Gatekeeper core;
+    class GitHub githubStyle;
+```
+
+**Backend:** https://trustchainfairtradeintegration.vercel.app/ [Production Vercel]  
+ **Frontend:** localhost:3000 [3-pool dashboard screenshot]
 
 ## What It Does
 TrustChain adds a reputation and integrity layer that enables Osmosis to operate as a trust-aware DEX. Users connect wallets, earn reputation through daily claims, and build verifiable trust scores that power DeFi interactions. No more anonymous trading - reputation becomes your on-chain identity.
+
+## FairScale Integration 
+
+**TrustChain cross-references FairScale API with proprietary Gini coefficient for sybil detection:**
+
+**Integration Flow:**
+1. Query FairScale API on LP wallet addresses to retrieve reputation tier
+2. Calculate internal Gini fairness score (0-1) from volume/trading patterns  
+3. **Block sybil reward claims** if: `Gini > 0.3` OR `FairScore < Tier 2`
+
+**Live Demo Results:**
+- Real LP wallets: FairScore Tier 3 + Gini 0.12 = **APPROVED**
+- Sybil wallets: FairScore Tier 1 + Gini 0.78 = **BLOCKED**
+
+**Architecture:**
+```text
+LP Wallet ─→ [FairScale API] ─→ Reputation Tier (1-5)
+│
+└──→ [Gini Analysis] ─→ Fairness Score (0-1)
+│
+└──→ [Dual Gatekeeper] ─→ APPROVED/BLOCKED
+```
+**Pseudocode Example:**
+```python
+async def check_lp_eligibility(wallet_address, wallet_trades):
+    fairscore_tier = await fairscale_api(wallet_address)
+    gini_score = calculate_gini_coefficient(wallet_trades)
+    
+    if gini_score > 0.3 or fairscore_tier < 2:
+        return "SYBIL_BLOCKED - Ineligible for LP rewards"
+    return "LP_REWARD_ELIGIBLE - Fair provider verified"
+Status: Live Osmosis testnet MVP. Solana Foundation $30k grant submitted Jan 22, 2026.
+```
 
 **Conceptual Separation**
 - **Reputation**: Wallet-level, user-facing score earned through participation
@@ -120,61 +182,20 @@ npm run dev
 - Formalize anti-sybil thresholds with validator input
 
 
-## Why Fund TrustChain:
+## Why Fund TrustChain: 
 
-Live MVP today - beats 80% whitepaper-only applicants
-
-Reputation gamifies Osmosis usage, drives retention
-
-DID foundation ready for on-chain attestations
-
-Production quality - mobile-ready, auto-deployed, zero bugs
-
-Next Milestones (with grant funding)
-
-Real on-chain reputation contracts (testnet → mainnet)
-
-Multi-wallet support (Keplr, Leap, Cosmostation)
-
-Social reputation feeds (IBC cross-chain)
-
-Mobile app (React Native + Expo)
-
-## FairScale Integration (Superteam Bounty Submission)
-
-**TrustChain cross-references FairScale API with proprietary Gini coefficient for sybil detection:**
-
-**Integration Flow:**
-1. Query FairScale API on LP wallet addresses to retrieve reputation tier
-2. Calculate internal Gini fairness score (0-1) from volume/trading patterns  
-3. **Block sybil reward claims** if: `Gini > 0.3` OR `FairScore < Tier 2`
-
-**Live Demo Results:**
-- Real LP wallets: FairScore Tier 3 + Gini 0.12 = **APPROVED**
-- Sybil wallets: FairScore Tier 1 + Gini 0.78 = **BLOCKED**
-
-**Architecture:**
-LP Wallet ─→ [FairScale API] ─→ Reputation Tier (1-5)
-│
-└──→ [Gini Analysis] ─→ Fairness Score (0-1)
-│
-└──→ [Dual Gatekeeper] ─→ APPROVED/BLOCKED
-
-**Pseudocode Example:**
-```python
-async def check_lp_eligibility(wallet_address, wallet_trades):
-    fairscore_tier = await fairscale_api(wallet_address)
-    gini_score = calculate_gini_coefficient(wallet_trades)
-    
-    if gini_score > 0.3 or fairscore_tier < 2:
-        return "SYBIL_BLOCKED - Ineligible for LP rewards"
-    return "LP_REWARD_ELIGIBLE - Fair provider verified"
-Status: Live Osmosis testnet MVP. Solana Foundation $30k grant submitted Jan 22, 2026.
-```
-
+- Live MVP today - beats 80% whitepaper-only applicants
+- Reputation gamifies Osmosis usage, drives retention
+- DID foundation ready for on-chain attestations
+- Production quality - mobile-ready, auto-deployed, zero bugs
+- Next Milestones (with grant funding)
+- Real on-chain reputation contracts (testnet → mainnet)
+- Multi-wallet support (Keplr, Leap, Cosmostation)
+- Social reputation feeds (IBC cross-chain)
+- Mobile app (React Native + Expo)
 
 ## Questions or input? DM me here or <a href="https://x.com/FreedomWithin__/" target="_blank">send me a message on X<a>
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
+Contributions are welcome! Feel free to open issues or submit pull requests. If you're interested in contributing, please reach out to me directly.

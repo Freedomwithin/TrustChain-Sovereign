@@ -1,0 +1,39 @@
+<div align="center"><h3 style="color:#1E3A8A;">My Agentic Workflow</h3></div>
+
+```mermaid
+graph TD
+    User((Jonathon: Architect)) -->|Strategic Input| Gemini(Gemini 3 Pro: Central Intelligence)
+    
+    subgraph "The Agentic Swarm"
+        Gemini -->|Task Delegation| Jules[Jules: Agentic Coder]
+        Gemini -->|Recon & Research| Perplexity[Perplexity: Librarian]
+        Gemini -->|Logic/Security Audit| Claude[Claude: Pedantic Auditor]
+    end
+
+    Jules -->|Automated PRs| GitHub[(GitHub: freedomwithin/TrustChain)]
+    Perplexity -->|Live CVE Data| Gemini
+    Claude -->|Vulnerability Check| GitHub
+
+    subgraph "Core Project: TrustChain"
+        GitHub --> Osmosis[Osmosis DEX Integration]
+        GitHub --> FairScale[FairScale/Gini Logic]
+        GitHub --> Gatekeeper[Dual Gatekeeper Protocol]
+    end
+
+%% Color Styling
+    classDef human fill:#1E3A8A,stroke:#3B82F6,stroke-width:3px,color:#fff;
+    classDef ai fill:#4C1D95,stroke:#8B5CF6,stroke-width:2px,color:#fff;
+    classDef core fill:#064E3B,stroke:#10B981,stroke-width:2px,color:#fff;
+    
+    %% Add this new line for the GitHub blue
+    classDef githubStyle fill:#1E3A8A,stroke:#0366d6,stroke-width:2px,color:#fff;
+
+    class User human;
+    class Gemini,Jules,Perplexity,Claude ai;
+    class Osmosis,FairScale,Gatekeeper core;
+    
+    %% Assign the style to the GitHub node
+    class GitHub githubStyle;
+    
+
+```

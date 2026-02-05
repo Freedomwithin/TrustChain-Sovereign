@@ -1,0 +1,17 @@
+# Stop the CLI from indexing these to save 8GB RAM
+venv/
+.venv/
+node_modules/
+.git/
+
+# Stop the CLI from reading giant datasets (saves tokens)
+*.csv
+*.log
+*.sqlite
+*.json
+
+# Build files
+__pycache__/
+*.pyc
+build/
+dist/
