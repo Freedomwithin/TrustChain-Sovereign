@@ -11,7 +11,7 @@ const connection = new Connection(rpcEndpoint, 'confirmed');
 
 // Middleware
 app.use(cors({
-  origin: ['https://trustchain-2-frontend.vercel.app', 'http://localhost:3000'],
+  origin: ['https://trustchain-2-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
   methods: ['GET', 'POST'],
   credentials: true
 }));
@@ -34,7 +34,8 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
   // Simulate network delay
   await delay(500);
 
-  // MOCK DATA for specific pools (aligned with frontend)
+  if (process.env.MOCK_MODE !== 'false') {
+    // MOCK DATA for specific pools (aligned with frontend)
   const mockData = {
     'OSMO-USDC': { // Actually SOL-USDC in this context
       giniScore: 0.25,
@@ -56,14 +57,17 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
     }
   };
 
-  const data = mockData[poolId] || {
-    giniScore: 0,
-    extractivenessScore: 0,
-    topHolders: 0,
-    totalLiquidity: 0
-  };
+    const data = mockData[poolId] || {
+      giniScore: 0,
+      extractivenessScore: 0,
+      topHolders: 0,
+      totalLiquidity: 0
+    };
+    return res.json(data);
+  }
 
-  res.json(data);
+  // Real logic placeholder (would call integrityEngine if enabled)
+  return res.status(501).json({ error: 'Real integrity check not implemented in this demo version' });
 });
 
 // Real endpoint to fetch Solana transaction history (Optional usage)
