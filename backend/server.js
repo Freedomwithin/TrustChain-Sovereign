@@ -3,6 +3,8 @@ const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
 
 const app = express();
+
+// Use the Vercel Environment Variable, with a fallback for local dev
 const port = process.env.PORT || 3001;
 
 // Solana Mainnet RPC
@@ -27,7 +29,6 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
   await delay(500);
 
   if (process.env.MOCK_MODE !== 'false') {
-    // REBRANDED KEYS: This ensures the frontend actually finds the data
     const mockData = {
       'SOL-USDC': {
         giniScore: 0.25,
