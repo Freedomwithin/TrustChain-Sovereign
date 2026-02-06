@@ -1,9 +1,0 @@
-{
-    "name": "trustchain-monorepo",
-    "version": "0.1.0",
-    "private": true,
-    "packageManager": "yarn@4.7.0",
-    "devDependencies": {
-        "webpack-bundle-analyzer": "^4.10.2"
-    }
-}
