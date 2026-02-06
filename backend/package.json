@@ -12,16 +12,15 @@
     "test:engine": "tsx test.ts"
   },
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "^0.33.0",
-    "@cosmjs/stargate": "^0.33.0",
+    "@solana/web3.js": "^1.98.4",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "express": "^4.18.2"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "tsx": "^4.21.0",
     "debug": "^4.4.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "tsx": "^4.21.0"
   }
 }

@@ -1,136 +1,88 @@
 const express = require('express');
 const cors = require('cors');
-const { SigningCosmWasmClient } = require('@cosmjs/cosmwasm-stargate');
-const { StargateClient } = require('@cosmjs/stargate');
+const { Connection, PublicKey } = require('@solana/web3.js');
+
 const app = express();
-const rpcEndpoint = 'https://rpc.osmosis.zone';
 const port = 3001;
 
+// Solana Mainnet RPC (using public endpoint for demo)
+const rpcEndpoint = 'https://api.mainnet-beta.solana.com';
+const connection = new Connection(rpcEndpoint, 'confirmed');
+
+// Middleware
 app.use(cors({
   origin: ['https://trustchain-2-frontend.vercel.app', 'http://localhost:3000'],
   methods: ['GET', 'POST'],
   credentials: true
 }));
 
+app.use(express.json());
+
 // Root route
-app.get('/', (req, res) => res.json({ status: 'TrustChain API Active' }));
+app.get('/', (req, res) => res.json({ status: 'TrustChain Solana API Active' }));
 
-// Function to fetch a proposal by its ID
-const getProposal = async (proposalId) => {
-    const client = await SigningCosmWasmClient.connect(rpcEndpoint);
-    const proposal = await client.gov.proposal(proposalId);
-    return proposal;
-};
-
-// API endpoint to get a proposal by ID
-app.get('/proposals/:id', async (req, res) => {
-    try {
-        const proposalId = req.params.id;
-        const proposal = await getProposal(proposalId);
-        res.json(proposal);
-    } catch (error) {
-        console.error('Error fetching proposal:', error);
-        res.status(500).json({ error: 'Failed to fetch proposal' });
-    }
-});
-
-// Function to fetch transactions for an address
-const getTransactions = async (address) => {
-    try {
-        const client = await StargateClient.connect(rpcEndpoint);
-        const transactions = await client.searchTx({ sentFromOrTo: address });
-
-        const transformedTransactions = transactions.map(tx => {
-            const message = tx.tx.body.messages[0]; // Assuming a single message per transaction
-            return {
-                hash: tx.hash,
-                type: message.typeUrl,
-                timestamp: tx.timestamp,
-                amount: message.amount ? message.amount[0].amount : 'N/A', // Extract amount if available
-                fee: tx.tx.authInfo.fee.amount[0].amount, // Extract fee
-                // ... other relevant data
-            };
-        });
-
-        return transformedTransactions;
-    } catch (error) {
-        console.error('Error fetching transactions:', error);
-        throw new Error('Failed to fetch transactions');
-    }
-};
-
-// API endpoint to get transactions for an address
-app.get('/users/:address/transactions', async (req, res) => {
-    try {
-        const address = req.params.address;
-        const transactions = await getTransactions(address);
-        res.json(transactions);
-    } catch (error) {
-        console.error('Error fetching transactions:', error);
-        res.status(500).json({ error: 'Failed to fetch transactions' });
-    }
-});
-
-// API endpoint to get reputation score for an address (placeholder)
-app.get('/users/:address/reputation', async (req, res) => {
-    // TODO: Implement actual reputation calculation
-    res.json({ score: 100 });
-});
-
-// Helper to throttle RPC calls
+// Helper to delay response (prevent rate limits)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Function to fetch real Osmosis pool data
-const fetchOsmosisPoolData = async (poolId) => {
-  try {
-    // Throttle to prevent 429 errors
-    await delay(500);
-
-    // Real Osmosis RPC endpoint
-    const client = await StargateClient.connect(rpcEndpoint);
-
-    // Query LP events for pool (simplified)
-    // Real data would come from client.searchTx({ poolId })
-    const events = [
-      { wallet: "osmosis1abc...", poolId, timestamp: 1, amount: 1000, type: "add" },
-      { wallet: "osmosis1xyz...", poolId, timestamp: 2, amount: -500, type: "remove" },
-      { wallet: "osmosis1hero", poolId, timestamp: 3600, amount: 250, type: "add" },
-    ];
-
-    return events;
-  } catch (error) {
-    console.log('Real data fetch failed, using fallback:', error);
-    // Fallback to working mock data
-    return [
-      { wallet: "sybil1", poolId, timestamp: 1, amount: 1000, type: "add" },
-      { wallet: "sybil1", poolId, timestamp: 2, amount: -1000, type: "remove" },
-      { wallet: "heroLP", poolId, timestamp: 1, amount: 100, type: "add" },
-      { wallet: "heroLP", poolId, timestamp: 3600, amount: 50, type: "add" }
-    ];
-  }
-};
-
-// API endpoint to get pool integrity scores
+/**
+ * MOCK_MODE: Returns hardcoded integrity data to bypass RPC rate limits.
+ * Real logic would query Solana history for the pool address.
+ */
 app.get('/api/pool/:id/integrity', async (req, res) => {
   const poolId = req.params.id;
 
-  // 🔥 REAL OSM/Raydium data
-  const realPoolEvents = await fetchOsmosisPoolData(poolId);
+  // Simulate network delay
+  await delay(500);
 
-  const integrityModule = await import('./integrityEngine.ts');
-  const calculateIntegrity = integrityModule.calculateIntegrity ||
-                           integrityModule.default?.calculateIntegrity ||
-                           integrityModule.default;
+  // MOCK DATA for specific pools (aligned with frontend)
+  const mockData = {
+    'OSMO-USDC': { // Actually SOL-USDC in this context
+      giniScore: 0.25,
+      extractivenessScore: 0.05, // Low Risk
+      topHolders: 15,
+      totalLiquidity: 5000000
+    },
+    'ATOM-OSMO': { // Actually SOL-ETH
+      giniScore: 0.42,
+      extractivenessScore: 0.35, // Medium Risk
+      topHolders: 8,
+      totalLiquidity: 1200000
+    },
+    'RAY-OSMO': { // Actually RAY-SOL
+      giniScore: 0.78,
+      extractivenessScore: 0.85, // High Risk
+      topHolders: 3,
+      totalLiquidity: 300000
+    }
+  };
 
-  if (typeof calculateIntegrity !== 'function') {
-    return res.status(500).json({ error: 'calculateIntegrity not found', module: integrityModule });
-  }
+  const data = mockData[poolId] || {
+    giniScore: 0,
+    extractivenessScore: 0,
+    topHolders: 0,
+    totalLiquidity: 0
+  };
 
-  const scores = await calculateIntegrity(poolId, realPoolEvents);
-  res.json(scores);
+  res.json(data);
 });
 
-// Start the server
+// Real endpoint to fetch Solana transaction history (Optional usage)
+app.get('/api/wallet/:address/history', async (req, res) => {
+  try {
+    const { address } = req.params;
+    const pubKey = new PublicKey(address);
+
+    // Fetch last 15 signatures
+    const signatures = await connection.getSignaturesForAddress(pubKey, { limit: 15 });
+
+    res.json(signatures);
+  } catch (error) {
+    console.error('Solana RPC Error:', error);
+    res.status(500).json({ error: 'Failed to fetch Solana history' });
+  }
+});
+
+// Start server
 app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+  console.log(`TrustChain Solana Backend running on port ${port}`);
 });

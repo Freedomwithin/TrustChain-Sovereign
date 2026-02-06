@@ -4,6 +4,7 @@
  */
 
 export interface LiquidityEvent {
+  signature: string; // Solana Transaction Signature
   wallet: string;
   poolId: string;
   timestamp: number;
