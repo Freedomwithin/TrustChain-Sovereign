@@ -77,9 +77,15 @@ app.get('/users/:address/reputation', async (req, res) => {
     res.json({ score: 100 });
 });
 
+// Helper to throttle RPC calls
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Function to fetch real Osmosis pool data
 const fetchOsmosisPoolData = async (poolId) => {
   try {
+    // Throttle to prevent 429 errors
+    await delay(500);
+
     // Real Osmosis RPC endpoint
     const client = await StargateClient.connect(rpcEndpoint);
 
