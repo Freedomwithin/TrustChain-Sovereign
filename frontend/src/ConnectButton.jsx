@@ -1,8 +1,9 @@
-import React, { useContext } from 'react';
-import { WalletConnectContext } from './context/WalletConnectContext.jsx';
+import React from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 const ReputationScore = () => {
-  const { account, isReady, connectWallet, disconnectWallet } = useContext(WalletConnectContext);
+  const { publicKey } = useWallet();
 
   const getReputationData = (address) => {
     if (!address) return null;
@@ -16,23 +17,18 @@ const ReputationScore = () => {
     };
   };
 
-  const repData = account ? getReputationData(account.address) : null;
-
-  if (!isReady) return <div className="loading">Loading TrustChain...</div>;
+  const repData = publicKey ? getReputationData(publicKey.toBase58()) : null;
 
   return (
     <div className="reputation-card">
       <h3>TrustChain Reputation</h3>
 
-      {!account ? (
-        <button onClick={connectWallet} className="connect-btn">
-          Connect Osmosis Wallet
-        </button>
+      {!publicKey ? (
+        <WalletMultiButton className="connect-btn" />
       ) : (
         <div className="connected space-y-4">
           <div className="wallet-info">
-            <div className="text-sm opacity-75">Connected:</div>
-            <div className="font-mono text-lg">{account.address.slice(0, 10)}...{account.address.slice(-4)}</div>
+             <WalletMultiButton className="connect-btn" />
           </div>
 
           <div className="rep-score text-center p-6 bg-gradient-to-b from-green-500/20 to-blue-500/20 rounded-2xl border border-green-500/30">
@@ -50,15 +46,11 @@ const ReputationScore = () => {
             onClick={() => {
               const txHash = `0x${Math.random().toString(16).slice(2, 66)}`;
               const newScore = repData.score + 25;
-              alert(`✅ Claim Success!\n\nTx: ${txHash.slice(0, 10)}...\n+25 Reputation\nNew Score: ${newScore}/1000\n\nView on Osmosis Testnet:\nhttps://testnet.mintscan.io/osmosis/tx/${txHash}`);
+              alert(`✅ Claim Success!\n\nTx: ${txHash.slice(0, 10)}...\n+25 Reputation\nNew Score: ${newScore}/1000\n\nView on Solana Explorer:\nhttps://explorer.solana.com/tx/${txHash}`);
             }}
             className="claim-btn"
           >
             Claim Daily Reputation (+25)
-          </button>
-
-          <button onClick={disconnectWallet} className="disconnect-btn">
-            Disconnect Wallet
           </button>
         </div>
       )}
