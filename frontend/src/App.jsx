@@ -7,7 +7,8 @@ function PoolIntegrityBadge({ poolId = 'RAY123' }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`https://trust-chain-backend-1nixsz5ct-jonathon-koerners-projects.vercel.app/api/pool/${poolId}/integrity`)
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    fetch(`${apiUrl}/api/pool/${poolId}/integrity`)
       .then(res => res.json())
       .then(data => {
         setIntegrity(data);

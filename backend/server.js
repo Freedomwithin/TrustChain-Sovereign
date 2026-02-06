@@ -10,8 +10,24 @@ const rpcEndpoint = 'https://api.mainnet-beta.solana.com';
 const connection = new Connection(rpcEndpoint, 'confirmed');
 
 // Middleware
+const allowedOrigins = [
+  'https://trustchain-2-frontend.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
+
 app.use(cors({
-  origin: ['https://trustchain-2-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Allow Vercel preview URLs
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST'],
   credentials: true
 }));
