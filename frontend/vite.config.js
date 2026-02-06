@@ -4,6 +4,10 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    'process.env': {},
+    'global': 'globalThis',
+  },
   plugins: [
     react(),
     nodePolyfills({
@@ -21,6 +25,6 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: './src/setupTests.js',
+    setupFiles: './src/setupTests.jsx',
   }
 })

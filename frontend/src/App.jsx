@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Navbar from './components/Navbar.jsx';
 import './App.css';
 
 function PoolIntegrityBadge({ poolId = 'RAY123' }) {
@@ -43,14 +44,17 @@ function App() {
 
   return (
     <div className="App">
-      <h1>🚀 TrustChain - Live Osmosis Pools</h1>
-      <div className="pool-grid">
-        {pools.map(pool => (
-          <div key={pool.id} className="pool-card">
-            <h3>{pool.name}</h3>
-            <PoolIntegrityBadge poolId={pool.id} />
-          </div>
-        ))}
+      <Navbar />
+      <div className="hero-content">
+        <h1>🚀 TrustChain - Live Osmosis Pools</h1>
+        <div className="pool-grid">
+          {pools.map(pool => (
+            <div key={pool.id} className="pool-card">
+              <h3>{pool.name}</h3>
+              <PoolIntegrityBadge poolId={pool.id} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
