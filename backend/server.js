@@ -3,62 +3,58 @@ const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
-// Solana Mainnet RPC (using public endpoint for demo)
+// Solana Mainnet RPC
 const rpcEndpoint = 'https://api.mainnet-beta.solana.com';
 const connection = new Connection(rpcEndpoint, 'confirmed');
 
-// Middleware
+// Middleware - Includes Jules' CORS fix for port 5173
 app.use(cors({
-  origin: ['https://trustchain-2-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: ['https://trustchain-2-frontend.vercel.app', 'http://localhost:5173', 'http://localhost:3000'],
   methods: ['GET', 'POST'],
   credentials: true
 }));
 
 app.use(express.json());
 
-// Root route
 app.get('/', (req, res) => res.json({ status: 'TrustChain Solana API Active' }));
 
-// Helper to delay response (prevent rate limits)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-/**
- * MOCK_MODE: Returns hardcoded integrity data to bypass RPC rate limits.
- * Real logic would query Solana history for the pool address.
- */
 app.get('/api/pool/:id/integrity', async (req, res) => {
   const poolId = req.params.id;
-
-  // Simulate network delay
   await delay(500);
 
   if (process.env.MOCK_MODE !== 'false') {
-    // MOCK DATA for specific pools (aligned with frontend)
-  const mockData = {
-    'OSMO-USDC': { // Actually SOL-USDC in this context
-      giniScore: 0.25,
-      extractivenessScore: 0.05, // Low Risk
-      topHolders: 15,
-      totalLiquidity: 5000000
-    },
-    'ATOM-OSMO': { // Actually SOL-ETH
-      giniScore: 0.42,
-      extractivenessScore: 0.35, // Medium Risk
-      topHolders: 8,
-      totalLiquidity: 1200000
-    },
-    'RAY-OSMO': { // Actually RAY-SOL
-      giniScore: 0.78,
-      extractivenessScore: 0.85, // High Risk
-      topHolders: 3,
-      totalLiquidity: 300000
-    }
-  };
+    // REBRANDED KEYS: This ensures the frontend actually finds the data
+    const mockData = {
+      'SOL-USDC': {
+        giniScore: 0.25,
+        integrityScore: 88,
+        extractivenessScore: 0.05,
+        topHolders: 15,
+        totalLiquidity: 5000000
+      },
+      'JUP-SOL': {
+        giniScore: 0.42,
+        integrityScore: 72,
+        extractivenessScore: 0.35,
+        topHolders: 8,
+        totalLiquidity: 1200000
+      },
+      'RAY-SOL': {
+        giniScore: 0.78,
+        integrityScore: 34,
+        extractivenessScore: 0.85,
+        topHolders: 3,
+        totalLiquidity: 300000
+      }
+    };
 
     const data = mockData[poolId] || {
       giniScore: 0,
+      integrityScore: 0,
       extractivenessScore: 0,
       topHolders: 0,
       totalLiquidity: 0
@@ -66,19 +62,14 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
     return res.json(data);
   }
 
-  // Real logic placeholder (would call integrityEngine if enabled)
-  return res.status(501).json({ error: 'Real integrity check not implemented in this demo version' });
+  return res.status(501).json({ error: 'Real integrity check not implemented' });
 });
 
-// Real endpoint to fetch Solana transaction history (Optional usage)
 app.get('/api/wallet/:address/history', async (req, res) => {
   try {
     const { address } = req.params;
     const pubKey = new PublicKey(address);
-
-    // Fetch last 15 signatures
     const signatures = await connection.getSignaturesForAddress(pubKey, { limit: 15 });
-
     res.json(signatures);
   } catch (error) {
     console.error('Solana RPC Error:', error);
@@ -86,7 +77,6 @@ app.get('/api/wallet/:address/history', async (req, res) => {
   }
 });
 
-// Start server
 app.listen(port, () => {
   console.log(`TrustChain Solana Backend running on port ${port}`);
 });
