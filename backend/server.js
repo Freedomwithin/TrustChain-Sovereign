@@ -10,24 +10,8 @@ const rpcEndpoint = 'https://api.mainnet-beta.solana.com';
 const connection = new Connection(rpcEndpoint, 'confirmed');
 
 // Middleware
-const allowedOrigins = [
-  'https://trustchain-2-frontend.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:5173'
-];
-
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    // Allow Vercel preview URLs
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: ['https://trustchain-2-frontend.vercel.app', /\.vercel\.app$/],
   methods: ['GET', 'POST'],
   credentials: true
 }));
@@ -100,6 +84,30 @@ app.get('/api/wallet/:address/history', async (req, res) => {
     console.error('Solana RPC Error:', error);
     res.status(500).json({ error: 'Failed to fetch Solana history' });
   }
+});
+
+// Standardized Verification Endpoint
+app.post('/api/verify', async (req, res) => {
+  const { address } = req.body;
+  if (!address) {
+    return res.status(400).json({ error: 'Wallet address is required' });
+  }
+
+  // Simulate analysis delay
+  await delay(300);
+
+  // MOCK LOGIC: Return a determinstic pseudo-random Gini score based on address
+  // This ensures consistent results for the same wallet without a database
+  let hash = 0;
+  for (let i = 0; i < address.length; i++) {
+    hash = ((hash << 5) - hash) + address.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
+  }
+  const normalizedHash = Math.abs(hash) % 1000; // 0-999
+  // Scale to 0.0 - 0.5 range (mostly safe)
+  const giniScore = normalizedHash / 2000;
+
+  return res.json({ giniScore });
 });
 
 // Start server
