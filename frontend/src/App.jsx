@@ -7,7 +7,8 @@ function PoolIntegrityBadge({ poolId = 'RAY123' }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    // Fallback to the production URL if env var is missing (Emergency Fix)
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://trust-chain-backend-1nixsz5ct-jonathon-koerners-projects.vercel.app';
     fetch(`${apiUrl}/api/pool/${poolId}/integrity`)
       .then(res => res.json())
       .then(data => {
