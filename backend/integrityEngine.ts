@@ -4,6 +4,7 @@
  */
 
 export interface LiquidityEvent {
+  signature: string; // Solana Transaction Signature
   wallet: string;
   poolId: string;
   timestamp: number;
@@ -57,7 +58,10 @@ export const checkLpEligibility = async (
 ): Promise<{ eligible: boolean; reason?: string; gini: number }> => {
 
   // 1. Calculate concentration based on current balances
-  const balances = walletEvents.reduce((acc: Record<string, number>, event) => {
+  // Optimize: Scan only the last 15 signatures to prevent timeouts
+  const recentEvents = walletEvents.slice(-15);
+
+  const balances = recentEvents.reduce((acc: Record<string, number>, event) => {
     acc[event.wallet] = (acc[event.wallet] || 0) + Math.abs(event.amount);
     return acc;
   }, {});

@@ -56,3 +56,6 @@ Thumbs.db
 yarn.lock
 yarn.lock
 .DS_Store
+frontend/build
+.yarn
+backend/node_modules
