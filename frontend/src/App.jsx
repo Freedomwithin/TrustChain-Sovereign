@@ -11,6 +11,14 @@ function WalletIntegrity() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const getStatusDisplay = (status, score) => {
+    if (status === 'ERROR') return { label: 'ERROR', color: 'red' };
+    if (status === 'PROBATIONARY' || score === 0.5) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
+    if (score < 0.1) return { label: 'TRUSTED ACTOR ✓', color: 'green' };
+    if (score <= 0.5) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
+    return { label: 'POTENTIAL SYBIL 🚨', color: 'red' };
+  };
+
   useEffect(() => {
     if (connected && publicKey) {
       setLoading(true);
@@ -36,6 +44,8 @@ function WalletIntegrity() {
 
   if (!connected) return null;
 
+  const display = getStatusDisplay(status, giniScore);
+
   return (
     <div className="pool-card" style={{ marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
       <h3>Your Wallet Integrity</h3>
@@ -43,14 +53,13 @@ function WalletIntegrity() {
         <span className="badge loading">Verifying...</span>
       ) : (
         <div style={{ textAlign: 'center' }}>
-          <span className={`badge risk-${(status === 'PROBATIONARY' || (giniScore >= 0.1 && giniScore <= 0.5)) ? 'orange' : giniScore < 0.1 ? 'green' : 'red'}`}>
-            {status === 'PROBATIONARY' ? 'PROBATIONARY ⚠️' :
-             giniScore < 0.1 ? 'TRUSTED ACTOR ✓' :
-             giniScore <= 0.5 ? 'PROBATIONARY ⚠️' : 'POTENTIAL SYBIL 🚨'}
+          <span className={`badge risk-${display.color}`}>
+            {display.label}
           </span>
           <div style={{ marginTop: '1rem' }}>
             <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
             {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffa500' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
+            {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ff4d4d' }}>Verification service error. Defaulting to risk mode.</div>}
           </div>
         </div>
       )}
