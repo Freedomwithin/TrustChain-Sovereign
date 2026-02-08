@@ -3,20 +3,11 @@
  * Logic: Dual Gatekeeper (FairScale + Gini/HHI)
  */
 
-export interface LiquidityEvent {
-  signature: string; // Solana Transaction Signature
-  wallet: string;
-  poolId: string;
-  timestamp: number;
-  amount: number;
-  type: 'add' | 'remove';
-}
-
 /**
  * Calculates the Gini Coefficient to detect wealth/liquidity concentration.
  * Range: 0 (Perfect Equality) to 1 (Total Inequality)
  */
-export const calculateGini = (values: number[]): number => {
+const calculateGini = (values) => {
   if (values.length < 2) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const n = sorted.length;
@@ -37,7 +28,7 @@ export const calculateGini = (values: number[]): number => {
 /**
  * Calculates HHI as a gas-efficient proxy for on-chain concentration.
  */
-export const calculateHHI = (values: number[]): number => {
+const calculateHHI = (values) => {
   const total = values.reduce((acc, val) => acc + val, 0);
   if (total === 0) return 0;
 
@@ -52,16 +43,16 @@ export const calculateHHI = (values: number[]): number => {
  * Dual Gatekeeper Logic
  * Cross-references FairScale Tier with local Integrity Score
  */
-export const checkLpEligibility = async (
-  fairScoreTier: number,
-  walletEvents: LiquidityEvent[]
-): Promise<{ eligible: boolean; reason?: string; gini: number }> => {
+const checkLpEligibility = async (
+  fairScoreTier,
+  walletEvents
+) => {
 
   // 1. Calculate concentration based on current balances
   // Optimize: Scan only the last 15 signatures to prevent timeouts
   const recentEvents = walletEvents.slice(-15);
 
-  const balances = recentEvents.reduce((acc: Record<string, number>, event) => {
+  const balances = recentEvents.reduce((acc, event) => {
     acc[event.wallet] = (acc[event.wallet] || 0) + Math.abs(event.amount);
     return acc;
   }, {});
@@ -80,4 +71,10 @@ export const checkLpEligibility = async (
   }
 
   return { eligible: true, gini };
+};
+
+module.exports = {
+  calculateGini,
+  calculateHHI,
+  checkLpEligibility
 };
