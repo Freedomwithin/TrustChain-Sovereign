@@ -67,23 +67,7 @@ function WalletIntegrity() {
   );
 }
 
-function PoolIntegrityBadge({ poolId = 'RAY123' }) {
-  const [integrity, setIntegrity] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/api/pool/${poolId}/integrity`)
-      .then(res => res.json())
-      .then(data => {
-        setIntegrity(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('API error:', err);
-        setLoading(false);
-      });
-  }, [poolId]);
-
+function PoolIntegrityBadge({ integrity, loading }) {
   if (loading) return <span className="badge loading">Analyzing...</span>;
 
   const riskLevel = integrity?.extractivenessScore || 0;
@@ -92,20 +76,41 @@ function PoolIntegrityBadge({ poolId = 'RAY123' }) {
   return (
     <span className={`badge risk-${riskColor}`}>
       {riskLevel < 0.1 && 'LOW RISK ✓'}
-      {riskLevel < 0.5 && 'MEDIUM RISK ⚠️'}
+      {riskLevel >= 0.1 && riskLevel < 0.5 && 'MEDIUM RISK ⚠️'}
       {riskLevel >= 0.5 && 'HIGH RISK 🚨'}
       <br />
-      <small>Gini: {integrity?.giniScore?.toFixed(3) || 0}</small>
+      <small>Gini: {integrity?.giniScore?.toFixed(3) || '0.500'}</small>
     </span>
   );
 }
 
+const pools = [
+  { id: 'SOL-USDC', name: 'SOL-USDC Pool' },
+  { id: 'JUP-SOL', name: 'JUP-SOL Pool' },
+  { id: 'RAY-SOL', name: 'RAY-SOL Pool' },
+];
+
 function App() {
-  const pools = [
-    { id: 'SOL-USDC', name: 'SOL-USDC Pool' },
-    { id: 'JUP-SOL', name: 'JUP-SOL Pool' },
-    { id: 'RAY-SOL', name: 'RAY-SOL Pool' },
-  ];
+  const [poolIntegrity, setPoolIntegrity] = useState({});
+  const [loadingPools, setLoadingPools] = useState(true);
+
+  useEffect(() => {
+    const poolIds = pools.map(p => p.id);
+    fetch(`${API_BASE_URL}/api/pools/integrity`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ poolIds })
+    })
+    .then(res => res.json())
+    .then(data => {
+      setPoolIntegrity(data);
+      setLoadingPools(false);
+    })
+    .catch(err => {
+      console.error('Batch API error:', err);
+      setLoadingPools(false);
+    });
+  }, []);
 
   return (
     <div className="App">
@@ -117,7 +122,10 @@ function App() {
           {pools.map(pool => (
             <div key={pool.id} className="pool-card">
               <h3>{pool.name}</h3>
-              <PoolIntegrityBadge poolId={pool.id} />
+              <PoolIntegrityBadge
+                integrity={poolIntegrity[pool.id]}
+                loading={loadingPools}
+              />
             </div>
           ))}
         </div>
