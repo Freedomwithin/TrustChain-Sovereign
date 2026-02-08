@@ -9,13 +9,11 @@ export const WalletConnectProvider = ({ children }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsReady(true);
-      console.log('✅ WalletConnectContext ready');
     }, 500);
     return () => clearTimeout(timer);
   }, []);
 
   const connectWallet = useCallback(() => {
-    console.log('🚀 Connect Wallet clicked - Osmosis');
     setAccount({ 
       address: 'osmo1x5lmkv2f5a9m2pkksvx7ddxd6xyu3p7x5elq9n',
       chainId: 'osmosis-1'
@@ -23,7 +21,6 @@ export const WalletConnectProvider = ({ children }) => {
   }, []);
 
   const disconnectWallet = useCallback(() => {
-    console.log('🔌 Wallet disconnected');
     setAccount(null);
   }, []);
 

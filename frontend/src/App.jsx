@@ -8,7 +8,16 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-
 function WalletIntegrity() {
   const { publicKey, connected } = useWallet();
   const [giniScore, setGiniScore] = useState(null);
+  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const getStatusDisplay = (status, score) => {
+    if (status === 'ERROR') return { label: 'ERROR', color: 'red' };
+    if (status === 'PROBATIONARY' || score === 0.5) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
+    if (score < 0.1) return { label: 'TRUSTED ACTOR ✓', color: 'green' };
+    if (score <= 0.5) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
+    return { label: 'POTENTIAL SYBIL 🚨', color: 'red' };
+  };
 
   useEffect(() => {
     if (connected && publicKey) {
@@ -20,7 +29,8 @@ function WalletIntegrity() {
       })
       .then(res => res.json())
       .then(data => {
-        setGiniScore(data.giniScore);
+        setGiniScore(parseFloat(data.giniScore));
+        setStatus(data.status);
         setLoading(false);
       })
       .catch(err => {
@@ -34,6 +44,8 @@ function WalletIntegrity() {
 
   if (!connected) return null;
 
+  const display = getStatusDisplay(status, giniScore);
+
   return (
     <div className="pool-card" style={{ marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
       <h3>Your Wallet Integrity</h3>
@@ -41,11 +53,13 @@ function WalletIntegrity() {
         <span className="badge loading">Verifying...</span>
       ) : (
         <div style={{ textAlign: 'center' }}>
-          <span className={`badge risk-${giniScore < 0.1 ? 'green' : giniScore <= 0.5 ? 'orange' : 'red'}`}>
-            {giniScore < 0.1 ? 'TRUSTED ACTOR ✓' : giniScore <= 0.5 ? 'PROBATIONARY ⚠️' : 'POTENTIAL SYBIL 🚨'}
+          <span className={`badge risk-${display.color}`}>
+            {display.label}
           </span>
           <div style={{ marginTop: '1rem' }}>
             <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
+            {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffa500' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
+            {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ff4d4d' }}>Verification service error. Defaulting to risk mode.</div>}
           </div>
         </div>
       )}
