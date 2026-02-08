@@ -100,8 +100,10 @@ app.post('/api/verify', async (req, res) => {
     // Fetch recent transaction signatures (limit to 5 for performance and rate limits)
     const signatures = await connection.getSignaturesForAddress(pubKey, { limit: 5 });
 
+    // Thin Wallet Logic: Default to 0.5 (Probationary) if not enough history
+    // This prevents Sybil attacks where fresh wallets appear "perfect"
     if (signatures.length < 2) {
-      return res.json({ giniScore: 0 }); // Not enough history to calculate inequality
+      return res.json({ giniScore: 0.5 });
     }
 
     const values = [];
@@ -134,8 +136,18 @@ app.post('/api/verify', async (req, res) => {
       }
     }
 
-    // Calculate Gini coefficient of the transaction values
-    const giniScore = calculateGini(values);
+    // Calculate Real Gini Score
+    const realGini = calculateGini(values);
+
+    // Scaling Logic: Move from 0.5 (default) toward real Gini as history grows
+    // Weight of real data increases with number of transactions (2 to 5)
+    // len=2: 25% real, 75% default
+    // len=5: 100% real
+    const dataCount = signatures.length;
+    const trustFactor = Math.min((dataCount - 1) / 4, 1);
+
+    // Weighted Average
+    const giniScore = (0.5 * (1 - trustFactor)) + (realGini * trustFactor);
 
     return res.json({ giniScore });
 

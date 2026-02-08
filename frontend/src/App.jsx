@@ -41,8 +41,8 @@ function WalletIntegrity() {
         <span className="badge loading">Verifying...</span>
       ) : (
         <div style={{ textAlign: 'center' }}>
-          <span className={`badge risk-${giniScore < 0.1 ? 'green' : giniScore < 0.3 ? 'orange' : 'red'}`}>
-            {giniScore < 0.1 ? 'TRUSTED ACTOR ✓' : 'POTENTIAL SYBIL ⚠️'}
+          <span className={`badge risk-${giniScore < 0.1 ? 'green' : giniScore <= 0.5 ? 'orange' : 'red'}`}>
+            {giniScore < 0.1 ? 'TRUSTED ACTOR ✓' : giniScore <= 0.5 ? 'PROBATIONARY ⚠️' : 'POTENTIAL SYBIL 🚨'}
           </span>
           <div style={{ marginTop: '1rem' }}>
             <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
