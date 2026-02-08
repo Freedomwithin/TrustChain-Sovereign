@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
-const { calculateGini } = require('./integrityEngine');
+const { calculateGini, calculateHHI } = require('./integrityEngine');
 
 const app = express();
 const port = 3001;
@@ -73,8 +73,15 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
 
 // Real endpoint to fetch Solana transaction history (Optional usage)
 app.get('/api/wallet/:address/history', async (req, res) => {
+  const { address } = req.params;
+
+  // Validate Solana address format (Base58, 32-44 chars)
+  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+  if (!address || typeof address !== 'string' || !base58Regex.test(address)) {
+    return res.status(400).json({ error: 'Invalid Solana wallet address format' });
+  }
+
   try {
-    const { address } = req.params;
     const pubKey = new PublicKey(address);
 
     // Fetch last 15 signatures
@@ -94,6 +101,12 @@ app.post('/api/verify', async (req, res) => {
     return res.status(400).json({ error: 'Wallet address is required' });
   }
 
+  // Validate Solana address format (Base58, 32-44 chars)
+  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+  if (typeof address !== 'string' || !base58Regex.test(address)) {
+    return res.status(400).json({ error: 'Invalid Solana wallet address format' });
+  }
+
   try {
     const pubKey = new PublicKey(address);
 
@@ -101,9 +114,13 @@ app.post('/api/verify', async (req, res) => {
     const signatures = await connection.getSignaturesForAddress(pubKey, { limit: 5 });
 
     // Thin Wallet Logic: Default to 0.5 (Probationary) if not enough history
-    // This prevents Sybil attacks where fresh wallets appear "perfect"
-    if (signatures.length < 2) {
-      return res.json({ giniScore: 0.5 });
+    // UPDATED: Check for 0, 1, or 2 transactions (signatures.length < 3)
+    if (signatures.length < 3) {
+      return res.json({
+        giniScore: 0.5,
+        hhiScore: 0,
+        status: 'PROBATIONARY'
+      });
     }
 
     const values = [];
@@ -136,25 +153,32 @@ app.post('/api/verify', async (req, res) => {
       }
     }
 
-    // Calculate Real Gini Score
+    // Calculate Real Gini and HHI Scores
     const realGini = calculateGini(values);
+    const hhiScore = calculateHHI(values);
 
     // Scaling Logic: Move from 0.5 (default) toward real Gini as history grows
-    // Weight of real data increases with number of transactions (2 to 5)
-    // len=2: 25% real, 75% default
-    // len=5: 100% real
+    // Weight of real data increases with number of transactions
     const dataCount = signatures.length;
-    const trustFactor = Math.min((dataCount - 1) / 4, 1);
+    const trustFactor = Math.min((dataCount - 2) / 3, 1); // Starts weighting at len=3
 
-    // Weighted Average
+    // Weighted Average for Gini
     const giniScore = (0.5 * (1 - trustFactor)) + (realGini * trustFactor);
 
-    return res.json({ giniScore });
+    return res.json({
+      giniScore,
+      hhiScore,
+      status: 'VERIFIED'
+    });
 
   } catch (error) {
     console.error('Error calculating integrity:', error);
-    // Fallback to safe default (0) on RPC error
-    return res.json({ giniScore: 0 });
+    // Fallback to safe default (0.5) on RPC error to prevent Sybil attacks
+    return res.json({
+      giniScore: 0.5,
+      hhiScore: 0,
+      status: 'ERROR'
+    });
   }
 });
 

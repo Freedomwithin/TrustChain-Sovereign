@@ -6,10 +6,10 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "tsx server.js",
-    "dev": "tsx server.js",
-    "test": "tsx test.ts",
-    "test:engine": "tsx test.ts"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test.js && node tests/security.test.js",
+    "test:engine": "node test.js"
   },
   "dependencies": {
     "@solana/web3.js": "^1.98.4",
