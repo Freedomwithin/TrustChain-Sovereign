@@ -73,8 +73,15 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
 
 // Real endpoint to fetch Solana transaction history (Optional usage)
 app.get('/api/wallet/:address/history', async (req, res) => {
+  const { address } = req.params;
+
+  // Validate Solana address format (Base58, 32-44 chars)
+  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+  if (!address || typeof address !== 'string' || !base58Regex.test(address)) {
+    return res.status(400).json({ error: 'Invalid Solana wallet address format' });
+  }
+
   try {
-    const { address } = req.params;
     const pubKey = new PublicKey(address);
 
     // Fetch last 15 signatures
@@ -92,6 +99,12 @@ app.post('/api/verify', async (req, res) => {
   const { address } = req.body;
   if (!address) {
     return res.status(400).json({ error: 'Wallet address is required' });
+  }
+
+  // Validate Solana address format (Base58, 32-44 chars)
+  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+  if (typeof address !== 'string' || !base58Regex.test(address)) {
+    return res.status(400).json({ error: 'Invalid Solana wallet address format' });
   }
 
   try {
