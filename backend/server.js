@@ -71,6 +71,58 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
   return res.status(501).json({ error: 'Real integrity check not implemented in this demo version' });
 });
 
+/**
+ * BATCH ENDPOINT: Fetches integrity data for multiple pools in one request.
+ * Optimization to prevent N+1 API calls from frontend.
+ */
+app.post('/api/pools/integrity', async (req, res) => {
+  const { poolIds } = req.body;
+
+  if (!Array.isArray(poolIds)) {
+    return res.status(400).json({ error: 'poolIds must be an array' });
+  }
+
+  // Simulate network delay (only once for the entire batch)
+  await delay(500);
+
+  if (process.env.MOCK_MODE !== 'false') {
+    const mockData = {
+      'SOL-USDC': {
+        giniScore: 0.25,
+        extractivenessScore: 0.05,
+        topHolders: 15,
+        totalLiquidity: 5000000
+      },
+      'JUP-SOL': {
+        giniScore: 0.42,
+        extractivenessScore: 0.35,
+        topHolders: 8,
+        totalLiquidity: 1200000
+      },
+      'RAY-SOL': {
+        giniScore: 0.78,
+        extractivenessScore: 0.85,
+        topHolders: 3,
+        totalLiquidity: 300000
+      }
+    };
+
+    const results = {};
+    poolIds.forEach(id => {
+      results[id] = mockData[id] || {
+        giniScore: 0,
+        extractivenessScore: 0,
+        topHolders: 0,
+        totalLiquidity: 0
+      };
+    });
+
+    return res.json(results);
+  }
+
+  return res.status(501).json({ error: 'Real batch integrity check not implemented' });
+});
+
 // Real endpoint to fetch Solana transaction history (Optional usage)
 app.get('/api/wallet/:address/history', async (req, res) => {
   const { address } = req.params;
