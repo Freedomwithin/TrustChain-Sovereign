@@ -28,7 +28,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@solana/web3.js", "npm:1.98.4"],\
-          ["@types/node", "npm:20.19.32"],\
+          ["@types/node", "npm:20.19.33"],\
           ["axios", "npm:1.13.4"],\
           ["cors", "npm:2.8.6"],\
           ["debug", "virtual:643ed7cc338bcf145a82d8b05b3bef6bcf150ca545df386225596f10ce53cc90b88b3ca83e348ade1ccea5f3f8e76c92d2f0e2ba544da60d40aff9921c56872d#npm:4.4.3"],\
@@ -474,7 +474,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../home/jules/.yarn/berry/cache/@types-connect-npm-3.4.38-a8a4c38337-10c0.zip/node_modules/@types/connect/",\
         "packageDependencies": [\
           ["@types/connect", "npm:3.4.38"],\
-          ["@types/node", "npm:25.2.1"]\
+          ["@types/node", "npm:25.2.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -487,18 +487,18 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:20.19.32", {\
-        "packageLocation": "../../home/jules/.yarn/berry/cache/@types-node-npm-20.19.32-4654504f2a-10c0.zip/node_modules/@types/node/",\
+      ["npm:20.19.33", {\
+        "packageLocation": "../../home/jules/.yarn/berry/cache/@types-node-npm-20.19.33-e3a79bc352-10c0.zip/node_modules/@types/node/",\
         "packageDependencies": [\
-          ["@types/node", "npm:20.19.32"],\
+          ["@types/node", "npm:20.19.33"],\
           ["undici-types", "npm:6.21.0"]\
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:25.2.1", {\
-        "packageLocation": "../../home/jules/.yarn/berry/cache/@types-node-npm-25.2.1-a138d77c79-10c0.zip/node_modules/@types/node/",\
+      ["npm:25.2.2", {\
+        "packageLocation": "../../home/jules/.yarn/berry/cache/@types-node-npm-25.2.2-5d63c599e1-10c0.zip/node_modules/@types/node/",\
         "packageDependencies": [\
-          ["@types/node", "npm:25.2.1"],\
+          ["@types/node", "npm:25.2.2"],\
           ["undici-types", "npm:7.16.0"]\
         ],\
         "linkType": "HARD"\
@@ -518,7 +518,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../home/jules/.yarn/berry/cache/@types-ws-npm-7.4.7-d0c95c0958-10c0.zip/node_modules/@types/ws/",\
         "packageDependencies": [\
           ["@types/ws", "npm:7.4.7"],\
-          ["@types/node", "npm:25.2.1"]\
+          ["@types/node", "npm:25.2.2"]\
         ],\
         "linkType": "HARD"\
       }],\
@@ -526,7 +526,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../home/jules/.yarn/berry/cache/@types-ws-npm-8.18.1-61dc106ff0-10c0.zip/node_modules/@types/ws/",\
         "packageDependencies": [\
           ["@types/ws", "npm:8.18.1"],\
-          ["@types/node", "npm:25.2.1"]\
+          ["@types/node", "npm:25.2.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1698,10 +1698,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["isexe", [\
-      ["npm:3.1.2", {\
-        "packageLocation": "../../home/jules/.yarn/berry/cache/isexe-npm-3.1.2-5b601d7277-10c0.zip/node_modules/isexe/",\
+      ["npm:3.1.4", {\
+        "packageLocation": "../../home/jules/.yarn/berry/cache/isexe-npm-3.1.4-c7ec278636-10c0.zip/node_modules/isexe/",\
         "packageDependencies": [\
-          ["isexe", "npm:3.1.2"]\
+          ["isexe", "npm:3.1.4"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2578,7 +2578,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["trustchain-backend", "workspace:."],\
           ["@solana/web3.js", "npm:1.98.4"],\
-          ["@types/node", "npm:20.19.32"],\
+          ["@types/node", "npm:20.19.33"],\
           ["axios", "npm:1.13.4"],\
           ["cors", "npm:2.8.6"],\
           ["debug", "virtual:643ed7cc338bcf145a82d8b05b3bef6bcf150ca545df386225596f10ce53cc90b88b3ca83e348ade1ccea5f3f8e76c92d2f0e2ba544da60d40aff9921c56872d#npm:4.4.3"],\
@@ -2738,7 +2738,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../home/jules/.yarn/berry/cache/which-npm-6.0.0-48f25f0ec8-10c0.zip/node_modules/which/",\
         "packageDependencies": [\
           ["which", "npm:6.0.0"],\
-          ["isexe", "npm:3.1.2"]\
+          ["isexe", "npm:3.1.4"]\
         ],\
         "linkType": "HARD"\
       }]\

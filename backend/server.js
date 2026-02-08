@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
+const { calculateGini } = require('./integrityEngine');
 
 const app = express();
 const port = 3001;
@@ -93,21 +94,56 @@ app.post('/api/verify', async (req, res) => {
     return res.status(400).json({ error: 'Wallet address is required' });
   }
 
-  // Simulate analysis delay
-  await delay(300);
+  try {
+    const pubKey = new PublicKey(address);
 
-  // MOCK LOGIC: Return a determinstic pseudo-random Gini score based on address
-  // This ensures consistent results for the same wallet without a database
-  let hash = 0;
-  for (let i = 0; i < address.length; i++) {
-    hash = ((hash << 5) - hash) + address.charCodeAt(i);
-    hash |= 0; // Convert to 32bit integer
+    // Fetch recent transaction signatures (limit to 5 for performance and rate limits)
+    const signatures = await connection.getSignaturesForAddress(pubKey, { limit: 5 });
+
+    if (signatures.length < 2) {
+      return res.json({ giniScore: 0 }); // Not enough history to calculate inequality
+    }
+
+    const values = [];
+
+    // Fetch transactions sequentially to avoid rate limits
+    for (const sigInfo of signatures) {
+      try {
+        await delay(200); // Rate limit throttle
+        const tx = await connection.getParsedTransaction(sigInfo.signature, {
+          maxSupportedTransactionVersion: 0
+        });
+
+        if (!tx || !tx.meta) continue;
+
+        // Find the account index for the wallet
+        const accountIndex = tx.transaction.message.accountKeys.findIndex(
+          key => key.pubkey.toBase58() === address
+        );
+
+        if (accountIndex !== -1) {
+          // Calculate the absolute change in SOL balance (in lamports)
+          const pre = tx.meta.preBalances[accountIndex] || 0;
+          const post = tx.meta.postBalances[accountIndex] || 0;
+          const change = Math.abs(pre - post);
+          values.push(change);
+        }
+      } catch (err) {
+        console.warn(`Failed to fetch tx ${sigInfo.signature}:`, err.message);
+        continue;
+      }
+    }
+
+    // Calculate Gini coefficient of the transaction values
+    const giniScore = calculateGini(values);
+
+    return res.json({ giniScore });
+
+  } catch (error) {
+    console.error('Error calculating integrity:', error);
+    // Fallback to safe default (0) on RPC error
+    return res.json({ giniScore: 0 });
   }
-  const normalizedHash = Math.abs(hash) % 1000; // 0-999
-  // Scale to 0.0 - 0.5 range (mostly safe)
-  const giniScore = normalizedHash / 2000;
-
-  return res.json({ giniScore });
 });
 
 // Start server
