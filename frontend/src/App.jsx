@@ -5,11 +5,16 @@ import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-backend.vercel.app';
 
-const getStatusDisplay = (status, score) => {
-  if (status === 'ERROR') return { label: 'ERROR', color: 'red' };
-  if (status === 'PROBATIONARY' || score === 0.5) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
-  if (score < 0.1) return { label: 'TRUSTED ACTOR ✓', color: 'green' };
-  if (score <= 0.5) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
+export const TRUSTED_THRESHOLD = 0.1;
+export const PROBATIONARY_THRESHOLD = 0.5;
+
+export const getStatusDisplay = (status, score) => {
+  if (status === 'ERROR' || score == null || Number.isNaN(score)) {
+    return { label: 'ERROR', color: 'red' };
+  }
+  if (status === 'PROBATIONARY') return { label: 'PROBATIONARY ⚠️', color: 'orange' };
+  if (score < TRUSTED_THRESHOLD) return { label: 'TRUSTED ACTOR ✓', color: 'green' };
+  if (score <= PROBATIONARY_THRESHOLD) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
   return { label: 'POTENTIAL SYBIL 🚨', color: 'red' };
 };
 
