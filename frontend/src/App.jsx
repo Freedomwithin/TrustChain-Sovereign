@@ -8,6 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-
 function WalletIntegrity() {
   const { publicKey, connected } = useWallet();
   const [giniScore, setGiniScore] = useState(null);
+  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -20,7 +21,8 @@ function WalletIntegrity() {
       })
       .then(res => res.json())
       .then(data => {
-        setGiniScore(data.giniScore);
+        setGiniScore(parseFloat(data.giniScore));
+        setStatus(data.status);
         setLoading(false);
       })
       .catch(err => {
@@ -41,11 +43,14 @@ function WalletIntegrity() {
         <span className="badge loading">Verifying...</span>
       ) : (
         <div style={{ textAlign: 'center' }}>
-          <span className={`badge risk-${giniScore < 0.1 ? 'green' : giniScore <= 0.5 ? 'orange' : 'red'}`}>
-            {giniScore < 0.1 ? 'TRUSTED ACTOR ✓' : giniScore <= 0.5 ? 'PROBATIONARY ⚠️' : 'POTENTIAL SYBIL 🚨'}
+          <span className={`badge risk-${(status === 'PROBATIONARY' || (giniScore >= 0.1 && giniScore <= 0.5)) ? 'orange' : giniScore < 0.1 ? 'green' : 'red'}`}>
+            {status === 'PROBATIONARY' ? 'PROBATIONARY ⚠️' :
+             giniScore < 0.1 ? 'TRUSTED ACTOR ✓' :
+             giniScore <= 0.5 ? 'PROBATIONARY ⚠️' : 'POTENTIAL SYBIL 🚨'}
           </span>
           <div style={{ marginTop: '1rem' }}>
             <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
+            {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffa500' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
           </div>
         </div>
       )}
