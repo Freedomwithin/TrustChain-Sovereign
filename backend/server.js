@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
-const { calculateGini } = require('./integrityEngine');
+const { calculateGini, calculateHHI } = require('./integrityEngine');
 
 const app = express();
 const port = 3001;
@@ -103,7 +103,7 @@ app.post('/api/verify', async (req, res) => {
     // Thin Wallet Logic: Default to 0.5 (Probationary) if not enough history
     // This prevents Sybil attacks where fresh wallets appear "perfect"
     if (signatures.length < 2) {
-      return res.json({ giniScore: 0.5 });
+      return res.json({ giniScore: 0.5, status: 'PROBATIONARY' });
     }
 
     const values = [];
@@ -139,6 +139,9 @@ app.post('/api/verify', async (req, res) => {
     // Calculate Real Gini Score
     const realGini = calculateGini(values);
 
+    // Calculate HHI Score (Gas-efficient proxy)
+    const hhiScore = calculateHHI(values);
+
     // Scaling Logic: Move from 0.5 (default) toward real Gini as history grows
     // Weight of real data increases with number of transactions (2 to 5)
     // len=2: 25% real, 75% default
@@ -149,7 +152,7 @@ app.post('/api/verify', async (req, res) => {
     // Weighted Average
     const giniScore = (0.5 * (1 - trustFactor)) + (realGini * trustFactor);
 
-    return res.json({ giniScore });
+    return res.json({ giniScore, hhiScore, status: 'VERIFIED' });
 
   } catch (error) {
     console.error('Error calculating integrity:', error);
