@@ -65,7 +65,7 @@ function PoolIntegrityBadge({ integrity, loading }) {
       {riskLevel >= 0.1 && riskLevel < 0.5 && 'MEDIUM RISK ⚠️'}
       {riskLevel >= 0.5 && 'HIGH RISK 🚨'}
       <br />
-      <small>Gini: {integrity?.giniScore?.toFixed(3) || 0}</small>
+      <small>Gini: {integrity?.giniScore?.toFixed(3) || '0.500'}</small>
     </span>
   );
 }

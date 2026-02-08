@@ -59,8 +59,9 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
   };
 
     const data = mockData[poolId] || {
-      giniScore: 0,
-      extractivenessScore: 0,
+      giniScore: 0.5,
+      status: 'PROBATIONARY',
+      extractivenessScore: 0.5,
       topHolders: 0,
       totalLiquidity: 0
     };
@@ -110,8 +111,9 @@ app.post('/api/pools/integrity', async (req, res) => {
     const results = {};
     poolIds.forEach(id => {
       results[id] = mockData[id] || {
-        giniScore: 0,
-        extractivenessScore: 0,
+        giniScore: 0.5,
+        status: 'PROBATIONARY',
+        extractivenessScore: 0.5,
         topHolders: 0,
         totalLiquidity: 0
       };
