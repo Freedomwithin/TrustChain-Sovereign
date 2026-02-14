@@ -1,6 +1,7 @@
 /**
  * TrustChain Integrity Engine
  * Logic: Dual Gatekeeper (FairScale + Gini/HHI)
+ * Ported to CommonJS for stability and deployment.
  */
 
 /**
@@ -8,7 +9,8 @@
  * Range: 0 (Perfect Equality) to 1 (Total Inequality)
  */
 const calculateGini = (values) => {
-  if (values.length < 2) return 0;
+  if (!values || values.length < 2) return 0;
+  
   const sorted = [...values].sort((a, b) => a - b);
   const n = sorted.length;
   let sumOfAbsoluteDifferences = 0;
@@ -30,6 +32,7 @@ const calculateGini = (values) => {
  * Calculates HHI as a gas-efficient proxy for on-chain concentration.
  */
 const calculateHHI = (values) => {
+  if (!values || values.length === 0) return 0;
   const total = values.reduce((acc, val) => acc + val, 0);
   if (total === 0) return 0;
 
@@ -44,11 +47,7 @@ const calculateHHI = (values) => {
  * Dual Gatekeeper Logic
  * Cross-references FairScale Tier with local Integrity Score
  */
-const checkLpEligibility = async (
-  fairScoreTier,
-  walletEvents
-) => {
-
+const checkLpEligibility = async (fairScoreTier, walletEvents) => {
   // 1. Calculate concentration based on current balances
   // Optimize: Scan only the last 15 signatures to prevent timeouts
   const recentEvents = walletEvents.slice(-15);
@@ -61,8 +60,6 @@ const checkLpEligibility = async (
   const gini = calculateGini(Object.values(balances));
 
   // 2. Dual Gatekeeper Check (Referencing AGENT.md rules)
-  // Rule 1: FairScale Tier >= 2
-  // Rule 2: Gini <= 0.3
   if (fairScoreTier < 2) {
     return { eligible: false, reason: "FairScale Tier insufficient (Sybil risk)", gini };
   }
