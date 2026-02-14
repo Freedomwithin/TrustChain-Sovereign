@@ -2,7 +2,7 @@
 
 # TrustChain: Solana-Native Integrity Layer
 
-**Original Osmosis Build:** <a href="https://trust-chain-frontend-ci2q.vercel.app/" target="_blank">Live Demo</a> (functional screenshot below)
+**Live Demo:** <a href="https://trust-chain-frontend.vercel.app/" target="_blank">Solana-Native Integrity Layer</a> (functional screenshot below)
 
 **Status:** Live Fullstack MVP (Solana Mainnet/Testnet Ready)
 
