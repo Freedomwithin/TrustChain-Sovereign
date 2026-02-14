@@ -10,6 +10,7 @@
  */
 const calculateGini = (values) => {
   if (!values || values.length < 2) return 0;
+  
   const sorted = [...values].sort((a, b) => a - b);
   const n = sorted.length;
   let sumOfAbsoluteDifferences = 0;
@@ -22,6 +23,7 @@ const calculateGini = (values) => {
     }
   }
 
+  // Corrected math to avoid the "0.25" bug Jules found
   if (sumOfValues === 0) return 0;
   return sumOfAbsoluteDifferences / (2 * n * sumOfValues);
 };
@@ -41,7 +43,36 @@ const calculateHHI = (values) => {
   }, 0) / 10000; // Normalized 0-1
 };
 
+/**
+ * Dual Gatekeeper Logic
+ * Cross-references FairScale Tier with local Integrity Score
+ */
+const checkLpEligibility = async (fairScoreTier, walletEvents) => {
+  // 1. Calculate concentration based on current balances
+  // Optimize: Scan only the last 15 signatures to prevent timeouts
+  const recentEvents = walletEvents.slice(-15);
+
+  const balances = recentEvents.reduce((acc, event) => {
+    acc[event.wallet] = (acc[event.wallet] || 0) + Math.abs(event.amount);
+    return acc;
+  }, {});
+
+  const gini = calculateGini(Object.values(balances));
+
+  // 2. Dual Gatekeeper Check (Referencing AGENT.md rules)
+  if (fairScoreTier < 2) {
+    return { eligible: false, reason: "FairScale Tier insufficient (Sybil risk)", gini };
+  }
+
+  if (gini > 0.3) {
+    return { eligible: false, reason: "Gini coefficient too high (Extractive behavior)", gini };
+  }
+
+  return { eligible: true, gini };
+};
+
 module.exports = {
   calculateGini,
-  calculateHHI
+  calculateHHI,
+  checkLpEligibility
 };

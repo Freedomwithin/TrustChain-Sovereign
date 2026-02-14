@@ -5,9 +5,23 @@ import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-backend.vercel.app';
 
+export const TRUSTED_THRESHOLD = 0.1;
+export const PROBATIONARY_THRESHOLD = 0.5;
+
+export const getStatusDisplay = (status, score) => {
+  if (status === 'ERROR' || score == null || Number.isNaN(score)) {
+    return { label: 'ERROR', color: 'red' };
+  }
+  if (status === 'PROBATIONARY') return { label: 'PROBATIONARY ⚠️', color: 'orange' };
+  if (score < TRUSTED_THRESHOLD) return { label: 'TRUSTED ACTOR ✓', color: 'green' };
+  if (score <= PROBATIONARY_THRESHOLD) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
+  return { label: 'POTENTIAL SYBIL 🚨', color: 'red' };
+};
+
 function WalletIntegrity() {
   const { publicKey, connected } = useWallet();
   const [giniScore, setGiniScore] = useState(null);
+  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -20,7 +34,8 @@ function WalletIntegrity() {
       })
       .then(res => res.json())
       .then(data => {
-        setGiniScore(data.giniScore);
+        setGiniScore(parseFloat(data.giniScore));
+        setStatus(data.status);
         setLoading(false);
       })
       .catch(err => {
@@ -34,6 +49,8 @@ function WalletIntegrity() {
 
   if (!connected) return null;
 
+  const display = getStatusDisplay(status, giniScore);
+
   return (
     <div className="pool-card" style={{ marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
       <h3>Your Wallet Integrity</h3>
@@ -41,11 +58,13 @@ function WalletIntegrity() {
         <span className="badge loading">Verifying...</span>
       ) : (
         <div style={{ textAlign: 'center' }}>
-          <span className={`badge risk-${giniScore < 0.1 ? 'green' : giniScore <= 0.5 ? 'orange' : 'red'}`}>
-            {giniScore < 0.1 ? 'TRUSTED ACTOR ✓' : giniScore <= 0.5 ? 'PROBATIONARY ⚠️' : 'POTENTIAL SYBIL 🚨'}
+          <span className={`badge risk-${display.color}`}>
+            {display.label}
           </span>
           <div style={{ marginTop: '1rem' }}>
             <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
+            {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffa500' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
+            {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ff4d4d' }}>Verification service error. Defaulting to risk mode.</div>}
           </div>
         </div>
       )}
@@ -53,45 +72,47 @@ function WalletIntegrity() {
   );
 }
 
-function PoolIntegrityBadge({ poolId = 'RAY123' }) {
-  const [integrity, setIntegrity] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/api/pool/${poolId}/integrity`)
-      .then(res => res.json())
-      .then(data => {
-        setIntegrity(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('API error:', err);
-        setLoading(false);
-      });
-  }, [poolId]);
-
+function PoolIntegrityBadge({ integrity, loading }) {
   if (loading) return <span className="badge loading">Analyzing...</span>;
 
-  const riskLevel = integrity?.extractivenessScore || 0;
-  const riskColor = riskLevel < 0.1 ? 'green' : riskLevel < 0.5 ? 'orange' : 'red';
+  const display = getStatusDisplay(integrity?.status, integrity?.extractivenessScore || 0);
 
   return (
-    <span className={`badge risk-${riskColor}`}>
-      {riskLevel < 0.1 && 'LOW RISK ✓'}
-      {riskLevel < 0.5 && 'MEDIUM RISK ⚠️'}
-      {riskLevel >= 0.5 && 'HIGH RISK 🚨'}
+    <span className={`badge risk-${display.color}`}>
+      {display.label}
       <br />
-      <small>Gini: {integrity?.giniScore?.toFixed(3) || 0}</small>
+      <small>Gini: {integrity?.giniScore?.toFixed(3) || '0.500'}</small>
     </span>
   );
 }
 
+const pools = [
+  { id: 'SOL-USDC', name: 'SOL-USDC Pool' },
+  { id: 'JUP-SOL', name: 'JUP-SOL Pool' },
+  { id: 'RAY-SOL', name: 'RAY-SOL Pool' },
+];
+
 function App() {
-  const pools = [
-    { id: 'SOL-USDC', name: 'SOL-USDC Pool' },
-    { id: 'JUP-SOL', name: 'JUP-SOL Pool' },
-    { id: 'RAY-SOL', name: 'RAY-SOL Pool' },
-  ];
+  const [poolIntegrity, setPoolIntegrity] = useState({});
+  const [loadingPools, setLoadingPools] = useState(true);
+
+  useEffect(() => {
+    const poolIds = pools.map(p => p.id);
+    fetch(`${API_BASE_URL}/api/pools/integrity`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ poolIds })
+    })
+    .then(res => res.json())
+    .then(data => {
+      setPoolIntegrity(data);
+      setLoadingPools(false);
+    })
+    .catch(err => {
+      console.error('Batch API error:', err);
+      setLoadingPools(false);
+    });
+  }, []);
 
   return (
     <div className="App">
@@ -103,7 +124,10 @@ function App() {
           {pools.map(pool => (
             <div key={pool.id} className="pool-card">
               <h3>{pool.name}</h3>
-              <PoolIntegrityBadge poolId={pool.id} />
+              <PoolIntegrityBadge
+                integrity={poolIntegrity[pool.id]}
+                loading={loadingPools}
+              />
             </div>
           ))}
         </div>
