@@ -76,7 +76,22 @@ function WalletIntegrity() {
           <div style={{ marginTop: '1rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'center' }}>
                <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
-               {hhiScore != null && !Number.isNaN(hhiScore) && <small>Concentration (HHI): {hhiScore?.toFixed(4)}</small>}
+               {hhiScore != null && !Number.isNaN(hhiScore) && (
+                 <div style={{ width: '100%', maxWidth: '200px', margin: '0.5rem auto' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.2rem' }}>
+                     <span>Concentration (HHI)</span>
+                     <span>{hhiScore.toFixed(4)}</span>
+                   </div>
+                   <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                     <div style={{
+                       width: `${Math.min(hhiScore * 100, 100)}%`,
+                       height: '100%',
+                       background: hhiScore > 0.25 ? '#ef4444' : hhiScore > 0.15 ? '#fbbf24' : '#34d399',
+                       transition: 'width 0.5s ease'
+                     }} />
+                   </div>
+                 </div>
+               )}
             </div>
             {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffd700' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
             {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#708090' }}>Insufficient transaction history for analysis</div>}

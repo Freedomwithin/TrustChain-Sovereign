@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
@@ -7,7 +8,7 @@ const app = express();
 const port = 3001;
 
 // Solana Mainnet RPC (using public endpoint for demo)
-const rpcEndpoint = 'https://api.mainnet-beta.solana.com';
+const rpcEndpoint = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 const connection = new Connection(rpcEndpoint, 'confirmed');
 
 // Middleware
