@@ -8,16 +8,23 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-
 export const TRUSTED_THRESHOLD = 0.1;
 export const PROBATIONARY_THRESHOLD = 0.5;
 
+export const STATUS_THEMES = {
+  ERROR: { label: 'INSUFFICIENT DATA', color: 'slate' },
+  VERIFIED: { label: 'TRUSTED ACTOR', color: 'neon-green' },
+  PROBATIONARY: { label: 'NEW ENTITY', color: 'gold' },
+  SYBIL: { label: 'POTENTIAL SYBIL 🚨', color: 'red' }
+};
+
 export const getStatusDisplay = (status, score) => {
   if (status === 'ERROR' || score == null || Number.isNaN(score)) {
-    return { label: 'INSUFFICIENT DATA', color: 'slate' };
+    return STATUS_THEMES.ERROR;
   }
-  if (status === 'VERIFIED') return { label: 'TRUSTED ACTOR', color: 'neon-green' };
-  if (status === 'PROBATIONARY') return { label: 'NEW ENTITY', color: 'gold' };
+  if (status === 'VERIFIED') return STATUS_THEMES.VERIFIED;
+  if (status === 'PROBATIONARY') return STATUS_THEMES.PROBATIONARY;
 
-  if (score < TRUSTED_THRESHOLD) return { label: 'TRUSTED ACTOR', color: 'neon-green' };
-  if (score <= PROBATIONARY_THRESHOLD) return { label: 'NEW ENTITY', color: 'gold' };
-  return { label: 'POTENTIAL SYBIL 🚨', color: 'red' };
+  if (score < TRUSTED_THRESHOLD) return STATUS_THEMES.VERIFIED;
+  if (score <= PROBATIONARY_THRESHOLD) return STATUS_THEMES.PROBATIONARY;
+  return STATUS_THEMES.SYBIL;
 };
 
 function WalletIntegrity() {
@@ -69,10 +76,10 @@ function WalletIntegrity() {
           <div style={{ marginTop: '1rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'center' }}>
                <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
-               {hhiScore != null && <small>Concentration (HHI): {hhiScore?.toFixed(4)}</small>}
+               {hhiScore != null && !Number.isNaN(hhiScore) && <small>Concentration (HHI): {hhiScore?.toFixed(4)}</small>}
             </div>
             {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffd700' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
-            {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#708090' }}>Verification service error. Defaulting to risk mode.</div>}
+            {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#708090' }}>Insufficient transaction history for analysis</div>}
           </div>
         </div>
       )}
