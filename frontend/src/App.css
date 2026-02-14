@@ -163,6 +163,42 @@ h1 {
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
+/* New Status Themes */
+.badge.risk-gold {
+  background: rgba(255, 215, 0, 0.2);
+  color: #FFD700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.badge.risk-neon-green {
+  background: rgba(57, 255, 20, 0.2);
+  color: #39FF14;
+  border: 1px solid rgba(57, 255, 20, 0.3);
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+}
+
+.badge.risk-slate {
+  background: rgba(112, 128, 144, 0.2);
+  color: #708090;
+  border: 1px solid rgba(112, 128, 144, 0.3);
+}
+
+/* Glassmorphism Glow Effect for Wallet Integrity Card */
+.wallet-integrity-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.wallet-integrity-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.1);
+}
+
 /* Wallet Adapter Modal Overrides */
 .wallet-adapter-modal-wrapper {
   background: #1a1b26 !important;

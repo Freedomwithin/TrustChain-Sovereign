@@ -8,19 +8,29 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-
 export const TRUSTED_THRESHOLD = 0.1;
 export const PROBATIONARY_THRESHOLD = 0.5;
 
+export const STATUS_THEMES = {
+  ERROR: { label: 'INSUFFICIENT DATA', color: 'slate' },
+  VERIFIED: { label: 'TRUSTED ACTOR', color: 'neon-green' },
+  PROBATIONARY: { label: 'NEW ENTITY', color: 'gold' },
+  SYBIL: { label: 'POTENTIAL SYBIL 🚨', color: 'red' }
+};
+
 export const getStatusDisplay = (status, score) => {
   if (status === 'ERROR' || score == null || Number.isNaN(score)) {
-    return { label: 'ERROR', color: 'red' };
+    return STATUS_THEMES.ERROR;
   }
-  if (status === 'PROBATIONARY') return { label: 'PROBATIONARY ⚠️', color: 'orange' };
-  if (score < TRUSTED_THRESHOLD) return { label: 'TRUSTED ACTOR ✓', color: 'green' };
-  if (score <= PROBATIONARY_THRESHOLD) return { label: 'PROBATIONARY ⚠️', color: 'orange' };
-  return { label: 'POTENTIAL SYBIL 🚨', color: 'red' };
+  if (status === 'VERIFIED') return STATUS_THEMES.VERIFIED;
+  if (status === 'PROBATIONARY') return STATUS_THEMES.PROBATIONARY;
+
+  if (score < TRUSTED_THRESHOLD) return STATUS_THEMES.VERIFIED;
+  if (score <= PROBATIONARY_THRESHOLD) return STATUS_THEMES.PROBATIONARY;
+  return STATUS_THEMES.SYBIL;
 };
 
 function WalletIntegrity() {
   const { publicKey, connected } = useWallet();
   const [giniScore, setGiniScore] = useState(null);
+  const [hhiScore, setHhiScore] = useState(null);
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +45,7 @@ function WalletIntegrity() {
       .then(res => res.json())
       .then(data => {
         setGiniScore(parseFloat(data.giniScore));
+        setHhiScore(parseFloat(data.hhiScore));
         setStatus(data.status);
         setLoading(false);
       })
@@ -44,6 +55,7 @@ function WalletIntegrity() {
       });
     } else {
       setGiniScore(null);
+      setHhiScore(null);
     }
   }, [connected, publicKey]);
 
@@ -52,7 +64,7 @@ function WalletIntegrity() {
   const display = getStatusDisplay(status, giniScore);
 
   return (
-    <div className="pool-card" style={{ marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
+    <div className="wallet-integrity-card" style={{ marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
       <h3>Your Wallet Integrity</h3>
       {loading ? (
         <span className="badge loading">Verifying...</span>
@@ -62,9 +74,12 @@ function WalletIntegrity() {
             {display.label}
           </span>
           <div style={{ marginTop: '1rem' }}>
-            <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
-            {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffa500' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
-            {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ff4d4d' }}>Verification service error. Defaulting to risk mode.</div>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'center' }}>
+               <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
+               {hhiScore != null && !Number.isNaN(hhiScore) && <small>Concentration (HHI): {hhiScore?.toFixed(4)}</small>}
+            </div>
+            {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffd700' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
+            {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#708090' }}>Insufficient transaction history for analysis</div>}
           </div>
         </div>
       )}
