@@ -53,6 +53,22 @@ graph TD
     class GitHub githubStyle;
 ```
 
+## 🛡️ Sovereign V2: Temporal Expansion (Feb 2026)
+Following the "Enterprise Hardening" phase, TrustChain has deployed the **Sovereign V2.1 Sentinel**, moving from static analysis to real-time behavioral firewalling.
+
+### 1. Temporal Sentinel (Heartbeat Monitoring)
+The system now monitors transaction flow within a **2,000ms sliding window**. By identifying identical instruction intent across disparate wallets in sub-second clusters, it calculates a **Synchronization Index** to catch bot swarms before they execute.
+
+### 2. Agentic Swarm SDK
+We have abstracted the security logic into a modular **RiskAuditorAgent**. This removes hard-coded bias and allows the AI Swarm to tune security thresholds dynamically:
+- **Threshold**: `PROBATIONARY_SYNC_INDEX_THRESHOLD = 0.35`
+- **Logic**: Automatically flags clusters of 4+ synchronized wallets.
+- **Verdict**: Issues structured `IntegrityDecision` objects directly to the Solana Notary.
+
+### 3. Logic Hardening
+- **Precision Constants**: All risk thresholds are moved to static class constants for easier tuning during security audits.
+- **Clean API Surface**: Removed legacy error states to ensure the `notary_sync` process only receives actionable `VERIFIED` or `PROBATIONARY` statuses.
+
 ## Dual Gatekeeper Protocol (Live)
 TrustChain proactively blocks extractive behavior using a two-tier verification system:
 1. **Gini Coefficient:** Detects wealth/liquidity inequality in real-time.
