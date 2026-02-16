@@ -9,6 +9,7 @@ import {
 import * as nacl from "tweetnacl";
 import crypto from "crypto";
 import dotenv from "dotenv";
+import { RiskAuditorAgent, TemporalObserver } from "../agents/core/base_agent";
 
 dotenv.config();
 
@@ -49,16 +50,31 @@ interface IntegrityScore {
   gini: number;
   hhi: number;
   status: string;
+  syncIndex?: number;
 }
 
 // Mock function to fetch score from Integrity Engine
 async function fetchVerifiedScore(wallet: PublicKey): Promise<IntegrityScore> {
   // In reality, this would call backend/integrityEngine.js logic
   console.log(`Fetching score for ${wallet.toBase58()}...`);
-  return {
+
+  // Simulated TemporalObserver data
+  const observerData: TemporalObserver = {
     gini: 0.25,
     hhi: 0.15,
-    status: "VERIFIED",
+    syncIndex: 0.42 // Trigger Probationary Status (> 0.35)
+  };
+
+  const agent = new RiskAuditorAgent();
+  const decision = agent.evaluate(observerData);
+
+  console.log(`Agent Decision: ${decision.status} (Reason: ${decision.reason || 'None'})`);
+
+  return {
+    gini: observerData.gini,
+    hhi: observerData.hhi,
+    status: decision.status,
+    syncIndex: observerData.syncIndex
   };
 }
 
