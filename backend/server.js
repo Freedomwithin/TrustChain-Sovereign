@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
-const { calculateGini, calculateHHI } = require('./integrityEngine');
+const { calculateGini, calculateHHI, calculateSyncIndex } = require('./integrityEngine');
 
 const app = express();
 const port = 3001;
@@ -71,7 +71,9 @@ app.post('/api/verify', async (req, res) => {
     }
 
     const values = [];
+    const timestamps = [];
     for (const sigInfo of signatures) {
+      if (sigInfo.blockTime) timestamps.push(sigInfo.blockTime);
       try {
         await delay(200); 
         const tx = await connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
@@ -88,12 +90,22 @@ app.post('/api/verify', async (req, res) => {
 
     const realGini = calculateGini(values);
     const hhiScore = calculateHHI(values);
+    const syncIndex = calculateSyncIndex(timestamps);
 
     // Scaling Logic: Weight real data more as history grows (dataCount - 2) / 3
     const trustFactor = Math.min((signatures.length - 2) / 3, 1);
     const giniScore = (0.5 * (1 - trustFactor)) + (realGini * trustFactor);
 
-    return res.json({ giniScore, hhiScore, status: 'VERIFIED' });
+    let status = 'VERIFIED';
+    let reason = undefined;
+
+    // Agentic Insight: SyncIndex Threshold
+    if (syncIndex > 0.35) {
+      status = 'PROBATIONARY';
+      reason = 'High syncIndex detected (Potential Cluster)';
+    }
+
+    return res.json({ giniScore, hhiScore, syncIndex, status, reason });
 
   } catch (error) {
     console.error('Error calculating integrity:', error);

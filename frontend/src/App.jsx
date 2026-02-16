@@ -31,6 +31,8 @@ function WalletIntegrity() {
   const { publicKey, connected } = useWallet();
   const [giniScore, setGiniScore] = useState(null);
   const [hhiScore, setHhiScore] = useState(null);
+  const [syncIndex, setSyncIndex] = useState(null);
+  const [reason, setReason] = useState(null);
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -46,6 +48,8 @@ function WalletIntegrity() {
       .then(data => {
         setGiniScore(parseFloat(data.giniScore));
         setHhiScore(parseFloat(data.hhiScore));
+        setSyncIndex(data.syncIndex !== undefined ? parseFloat(data.syncIndex) : null);
+        setReason(data.reason || null);
         setStatus(data.status);
         setLoading(false);
       })
@@ -56,6 +60,8 @@ function WalletIntegrity() {
     } else {
       setGiniScore(null);
       setHhiScore(null);
+      setSyncIndex(null);
+      setReason(null);
     }
   }, [connected, publicKey]);
 
@@ -93,7 +99,22 @@ function WalletIntegrity() {
                  </div>
                )}
             </div>
-            {status === 'PROBATIONARY' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffd700' }}>Limited history: Minimum 2 transactions required for full verification.</div>}
+            {status === 'PROBATIONARY' && (
+              <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffd700', border: '1px solid rgba(255, 215, 0, 0.3)', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255, 215, 0, 0.05)' }}>
+                {reason ? (
+                   <>
+                     <strong>⚠️ Agent Insight:</strong> {reason}
+                     {syncIndex !== null && (
+                       <div style={{ fontSize: '0.75rem', marginTop: '0.2rem' }}>
+                          Sync Index: <strong>{syncIndex.toFixed(2)}</strong> (High Correlation)
+                       </div>
+                     )}
+                   </>
+                ) : (
+                   "Limited history: Minimum 2 transactions required for full verification."
+                )}
+              </div>
+            )}
             {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#708090' }}>Insufficient transaction history for analysis</div>}
           </div>
         </div>
