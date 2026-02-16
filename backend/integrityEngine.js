@@ -44,6 +44,33 @@ const calculateHHI = (values) => {
 };
 
 /**
+ * Calculates syncIndex based on transaction timestamps.
+ * Detects automated/bot-like behavior (highly synchronized).
+ */
+const calculateSyncIndex = (timestamps) => {
+  if (!timestamps || timestamps.length < 3) return 0;
+
+  const sorted = [...timestamps].sort((a, b) => a - b);
+  const diffs = [];
+  for (let i = 1; i < sorted.length; i++) {
+    diffs.push(sorted[i] - sorted[i-1]);
+  }
+
+  const mean = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+  if (mean === 0) return 1; // All transactions in same block? Highly synchronized.
+
+  const variance = diffs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / diffs.length;
+  const stdDev = Math.sqrt(variance);
+
+  // Coefficient of Variation (CV) = stdDev / mean
+  // If CV is low (regular intervals), syncIndex is high.
+  // If CV is high (random intervals), syncIndex is low.
+  // Range: 0 to 1.
+  const cv = stdDev / mean;
+  return 1 / (1 + cv);
+};
+
+/**
  * Dual Gatekeeper Logic
  * Cross-references FairScale Tier with local Integrity Score
  */
@@ -74,5 +101,6 @@ const checkLpEligibility = async (fairScoreTier, walletEvents) => {
 module.exports = {
   calculateGini,
   calculateHHI,
+  calculateSyncIndex,
   checkLpEligibility
 };
