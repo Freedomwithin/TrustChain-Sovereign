@@ -5,12 +5,14 @@ export interface TemporalObserver {
 }
 
 export interface IntegrityDecision {
-  status: 'VERIFIED' | 'PROBATIONARY' | 'ERROR';
+  status: 'VERIFIED' | 'PROBATIONARY';
   score: TemporalObserver;
   reason?: string;
 }
 
 export class RiskAuditorAgent {
+  static readonly PROBATIONARY_SYNC_INDEX_THRESHOLD = 0.35;
+
   /**
    * Wraps the TemporalObserver results into a JSON decision object for the Notary.
    * Logic: If syncIndex > 0.35, trigger 'Probationary' status.
@@ -21,7 +23,7 @@ export class RiskAuditorAgent {
     let reason: string | undefined;
 
     // Threshold Alignment: syncIndex > 0.35 -> Probationary
-    if (data.syncIndex > 0.35) {
+    if (data.syncIndex > RiskAuditorAgent.PROBATIONARY_SYNC_INDEX_THRESHOLD) {
       status = 'PROBATIONARY';
       reason = 'High syncIndex detected (Potential Cluster)';
     }
