@@ -1,0 +1,152 @@
+.risk-detail-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.05);
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.risk-detail-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.1);
+}
+
+.risk-detail-content {
+  text-align: center;
+}
+
+.risk-badge {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  border-radius: 16px;
+  font-weight: 700; /* Bolder for high contrast */
+  font-size: 1rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* High Contrast Statuses */
+.risk-badge.verified {
+  background: #004d40; /* Darker green background */
+  color: #00ffaa; /* Brighter neon green text */
+  border: 2px solid #00ffaa;
+  box-shadow: 0 0 15px rgba(0, 255, 170, 0.4);
+}
+
+.risk-badge.probationary {
+  background: #4a3b00; /* Darker gold/brown background */
+  color: #ffd700; /* Bright gold text */
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.risk-badge.error {
+  background: #374151;
+  color: #9ca3af;
+  border: 1px solid #6b7280;
+}
+
+.risk-badge.sybil {
+  background: #450a0a;
+  color: #f87171;
+  border: 2px solid #ef4444;
+}
+
+.metrics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+/* Tooltip Styles */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.5);
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 10;
+  bottom: 125%; /* Position above */
+  left: 50%;
+  margin-left: -100px; /* Center */
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.75rem;
+  font-weight: normal;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.hhi-bar-container {
+  width: 100%;
+  max-width: 200px;
+  margin: 0.5rem auto;
+}
+
+.hhi-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.hhi-track {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hhi-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.insight-box {
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.loading-spinner {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}

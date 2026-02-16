@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Navbar from './components/Navbar.jsx';
+import RiskDetail from './components/RiskDetail.jsx';
 import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-backend.vercel.app';
@@ -67,59 +68,15 @@ function WalletIntegrity() {
 
   if (!connected) return null;
 
-  const display = getStatusDisplay(status, giniScore);
-
   return (
-    <div className="wallet-integrity-card" style={{ marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
-      <h3>Your Wallet Integrity</h3>
-      {loading ? (
-        <span className="badge loading">Verifying...</span>
-      ) : (
-        <div style={{ textAlign: 'center' }}>
-          <span className={`badge risk-${display.color}`}>
-            {display.label}
-          </span>
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'center' }}>
-               <small>Personal Gini Score: {giniScore?.toFixed(4)}</small>
-               {hhiScore != null && !Number.isNaN(hhiScore) && (
-                 <div style={{ width: '100%', maxWidth: '200px', margin: '0.5rem auto' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.2rem' }}>
-                     <span>Concentration (HHI)</span>
-                     <span>{hhiScore.toFixed(4)}</span>
-                   </div>
-                   <div style={{ height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
-                     <div style={{
-                       width: `${Math.min(hhiScore * 100, 100)}%`,
-                       height: '100%',
-                       background: hhiScore > 0.25 ? '#ef4444' : hhiScore > 0.15 ? '#fbbf24' : '#34d399',
-                       transition: 'width 0.5s ease'
-                     }} />
-                   </div>
-                 </div>
-               )}
-            </div>
-            {status === 'PROBATIONARY' && (
-              <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#ffd700', border: '1px solid rgba(255, 215, 0, 0.3)', padding: '0.5rem', borderRadius: '4px', background: 'rgba(255, 215, 0, 0.05)' }}>
-                {reason ? (
-                   <>
-                     <strong>⚠️ Agent Insight:</strong> {reason}
-                     {syncIndex !== null && (
-                       <div style={{ fontSize: '0.75rem', marginTop: '0.2rem' }}>
-                          Sync Index: <strong>{syncIndex.toFixed(2)}</strong> (High Correlation)
-                       </div>
-                     )}
-                   </>
-                ) : (
-                   "Limited history: Minimum 2 transactions required for full verification."
-                )}
-              </div>
-            )}
-            {status === 'ERROR' && <div style={{ fontSize: '0.8rem', marginTop: '0.5rem', color: '#708090' }}>Insufficient transaction history for analysis</div>}
-          </div>
-        </div>
-      )}
-    </div>
+    <RiskDetail
+      status={status}
+      giniScore={giniScore}
+      hhiScore={hhiScore}
+      syncIndex={syncIndex}
+      reason={reason}
+      loading={loading}
+    />
   );
 }
 

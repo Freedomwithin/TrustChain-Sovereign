@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
-const { calculateGini, calculateHHI, calculateSyncIndex } = require('./integrityEngine');
+const { calculateGini, calculateHHI } = require('./integrityEngine');
+const { calculateSyncIndex } = require('./utils/sentinel');
 
 const app = express();
 const port = 3001;
@@ -90,7 +91,7 @@ app.post('/api/verify', async (req, res) => {
 
     const realGini = calculateGini(values);
     const hhiScore = calculateHHI(values);
-    const syncIndex = calculateSyncIndex(timestamps);
+    const { syncIndex } = calculateSyncIndex(timestamps);
 
     // Scaling Logic: Weight real data more as history grows (dataCount - 2) / 3
     const trustFactor = Math.min((signatures.length - 2) / 3, 1);
