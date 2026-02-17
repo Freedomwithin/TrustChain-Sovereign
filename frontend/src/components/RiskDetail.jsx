@@ -48,7 +48,7 @@ const RiskDetail = ({ status, giniScore, hhiScore, syncIndex, reason, loading })
         <div className="metrics-container">
           {/* Gini Score with Tooltip */}
           <div className="tooltip-container">
-            <small>Personal Gini Score: {giniScore?.toFixed(4) || 'N/A'}</small>
+            <small>Personal Gini Score: {Number.isFinite(giniScore) ? giniScore.toFixed(4) : 'N/A'}</small>
             <span className="tooltip-text">Gini Coefficient: Measures wealth inequality (0-1). Lower is better distribution.</span>
           </div>
 

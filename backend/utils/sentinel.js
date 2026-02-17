@@ -9,8 +9,11 @@
  * @param {number[]} timestamps - Array of transaction timestamps (in seconds).
  * @returns {Object} - { syncIndex, burstRatio }
  */
+const BURST_THRESHOLD = 10;
+const MIN_TRANSACTIONS = 3;
+
 const calculateSyncIndex = (timestamps) => {
-  if (!timestamps || timestamps.length < 3) {
+  if (!timestamps || timestamps.length < MIN_TRANSACTIONS) {
     return { syncIndex: 0, burstRatio: 0 };
   }
 
@@ -22,8 +25,8 @@ const calculateSyncIndex = (timestamps) => {
     const diff = sorted[i] - sorted[i-1];
     diffs.push(diff);
 
-    // Weighted burst detection: gaps <= 10s are considered bursts
-    if (diff <= 10) {
+    // Weighted burst detection: gaps <= BURST_THRESHOLD are considered bursts
+    if (diff <= BURST_THRESHOLD) {
       burstCount++;
     }
   }
