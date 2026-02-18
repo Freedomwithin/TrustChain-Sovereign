@@ -105,23 +105,33 @@ function App() {
   const [loadingPools, setLoadingPools] = useState(true);
 
   useEffect(() => {
-    const poolIds = pools.map(p => p.id);
-    fetch(`${API_BASE_URL}/api/pools/integrity`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ poolIds })
-    })
-    .then(res => res.json())
-    .then(data => {
-      setPoolIntegrity(data);
-      setLoadingPools(false);
-    })
-    .catch(err => {
-      console.error('Batch API error:', err);
-      setLoadingPools(false);
-    });
-  }, []);
+    setLoadingPools(true);
 
+    const fetchPromises = pools.map(pool =>
+      fetch(`${API_BASE_URL}/api/pool/${pool.id}/integrity`)
+        .then(res => res.json())
+        .then(data => ({ id: pool.id, data }))
+        .catch(err => ({ id: pool.id, error: err }))
+    );
+
+    Promise.all(fetchPromises)
+      .then(results => {
+        const integrityMap = {};
+        results.forEach(result => {
+          if (!result.error) {
+            integrityMap[result.id] = result.data;
+          }
+        });
+        setPoolIntegrity(integrityMap);
+        setLoadingPools(false);
+      })
+      .catch(err => {
+        console.error('Parallel API error:', err);
+        setLoadingPools(false);
+      });
+  }, []); // Added closing brace for useEffect
+
+  // RESTORED RETURN BLOCK
   return (
     <div className="App">
       <Navbar />
@@ -145,3 +155,4 @@ function App() {
 }
 
 export default App;
+
