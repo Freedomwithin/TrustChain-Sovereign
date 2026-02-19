@@ -1,4 +1,5 @@
 const { calculateGini, calculateHHI, checkSyncIndex } = require('../services/integrityEngine');
+const { submitNotarization } = require('../utils/solanaBridge');
 
 class Configuration {
   static PROBATIONARY_SYNC_INDEX_THRESHOLD = 0.35;
@@ -13,13 +14,20 @@ class RiskAuditorAgent {
    * @param {object} data - The wallet data (transactions, positions, signatures).
    * @returns {object} - The decision object containing status, scores, and reason.
    */
-  static notarizeDecision(address, decision) {
+  static async notarizeDecision(address, decision) {
     if (decision.status === 'SYBIL') {
       console.error(`[SECURITY EVENT] Sybil detected for wallet: ${address}`);
+    } else if (decision.status === 'VERIFIED') {
+      try {
+        await submitNotarization(address, decision.status, decision.scores.gini, decision.scores.hhi);
+      } catch (error) {
+        console.error(`[NOTARY ERROR] Failed to notarize verified wallet ${address}:`, error.message);
+        // Do not throw, so the backend response isn't affected by blockchain issues
+      }
     }
   }
 
-  static getIntegrityDecision(address, data) {
+  static async getIntegrityDecision(address, data) {
     const gini = calculateGini(data.transactions);
     const hhi = calculateHHI(data.positions);
     const syncIndex = checkSyncIndex(data.signatures);
@@ -42,7 +50,8 @@ class RiskAuditorAgent {
       reason
     };
 
-    RiskAuditorAgent.notarizeDecision(address, decision);
+    // Make this async to handle the side effect (notarization)
+    await RiskAuditorAgent.notarizeDecision(address, decision);
 
     return decision;
   }

@@ -143,7 +143,7 @@ app.get('/api/verify/:address', validateAddress, async (req, res) => {
   try {
     const data = await fetchWalletData(address);
     const start = performance.now();
-    const result = RiskAuditorAgent.getIntegrityDecision(address, data);
+    const result = await RiskAuditorAgent.getIntegrityDecision(address, data);
     const end = performance.now();
     result.latencyMs = Math.round(end - start);
     res.json(result);
@@ -174,7 +174,7 @@ app.post('/api/verify', async (req, res) => {
   try {
     const data = await fetchWalletData(address);
     const start = performance.now();
-    const result = RiskAuditorAgent.getIntegrityDecision(address, data);
+    const result = await RiskAuditorAgent.getIntegrityDecision(address, data);
     const end = performance.now();
     result.latencyMs = Math.round(end - start);
     res.json(result);
