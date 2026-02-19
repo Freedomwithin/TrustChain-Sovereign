@@ -6,8 +6,6 @@
 
 **Status:** Live Fullstack MVP (Solana Mainnet/Testnet Ready)
 
-**Grant Phase:** Resubmission - Enterprise Hardening Phase
-
 ![alt text](assets/trustchain_live_ui.png)
 
 ## The Evolution
@@ -116,8 +114,6 @@ async def check_lp_eligibility(wallet_address, wallet_trades):
         return "SYBIL_BLOCKED - Ineligible for LP rewards"
     return "LP_REWARD_ELIGIBLE - Fair provider verified"
 ```
-
-Status: Live Osmosis testnet MVP. Solana Foundation $30k grant submitted Jan 22, 2026.
 
 **Conceptual Separation**
 - **Reputation**: Wallet-level, user-facing score earned through participation
@@ -230,28 +226,9 @@ npm run dev
 - [x] Adversarial Security Test Suite
 - [x] Dynamic Status Mapping (Trusted/Probationary/Insufficient Data)
 
-## Osmosis Grant Value - Stage 1 Ready ($25K-$50K potential)
-**Funding Use (Stage 1):**
-- Harden on-chain reputation contracts
-- Expand integrity metrics across top Osmosis pools
-- Formalize anti-sybil thresholds with validator input
-
-## Why Fund TrustChain
-
-- Live MVP today - beats 80% whitepaper-only applicants
-- Reputation gamifies Osmosis usage, drives retention
-- DID foundation ready for on-chain attestations
-- Production quality - mobile-ready, auto-deployed, zero bugs
-
-## Next Milestones (with grant funding)
-- Real on-chain reputation contracts (testnet → mainnet)
-- Multi-wallet support (Keplr, Leap, Cosmostation)
-- Social reputation feeds (IBC cross-chain)
-- Mobile app (React Native + Expo)
-
 ## Questions or input? 
 
-DM me here or <a href="https://x.com/FreedomWithin__/" target="_blank">send me a message on X</a>
+DM me here or <a href="https://x.com/TrustChainDev/" target="_blank">send me a message on X</a>
 
 ## Contributing
 
