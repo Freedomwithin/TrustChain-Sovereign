@@ -14,6 +14,7 @@ pub mod trustchain_notary {
         require_keys_eq!(ctx.accounts.notary.key(), NOTARY_PUBKEY, TrustChainError::UnauthorizedNotary);
 
         let user_integrity = &mut ctx.accounts.user_integrity;
+        user_integrity.pub_key = ctx.accounts.user.key();
         user_integrity.gini_score = gini_score;
         user_integrity.hhi_score = hhi_score;
         user_integrity.status = status;
@@ -27,7 +28,7 @@ pub struct UpdateIntegrity<'info> {
     #[account(
         init_if_needed,
         payer = notary,
-        space = 8 + 2 + 2 + 1 + 8 + 64, // Added 64 bytes padding for future upgrades
+        space = 8 + 32 + 2 + 2 + 1 + 8 + 64, // Added 32 bytes for pub_key + 64 bytes padding
         seeds = [b"config", user.key().as_ref()],
         bump
     )]
@@ -44,6 +45,7 @@ pub struct UpdateIntegrity<'info> {
 
 #[account]
 pub struct UserIntegrity {
+    pub pub_key: Pubkey,
     pub gini_score: u16,
     pub hhi_score: u16,
     pub status: u8,
