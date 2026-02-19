@@ -6,6 +6,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-
 export interface IntegrityData {
     giniScore: number | null;
     hhiScore: number | null;
+    syncIndex: number | null;
+    reason: string | null;
+    latencyMs: number | null;
     status: string | null;
     loading: boolean;
     error: string | null;
@@ -15,6 +18,9 @@ export function useIntegrity(): IntegrityData {
     const { publicKey, connected } = useWallet();
     const [giniScore, setGiniScore] = useState<number | null>(null);
     const [hhiScore, setHhiScore] = useState<number | null>(null);
+    const [syncIndex, setSyncIndex] = useState<number | null>(null);
+    const [reason, setReason] = useState<string | null>(null);
+    const [latencyMs, setLatencyMs] = useState<number | null>(null);
     const [status, setStatus] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -40,8 +46,13 @@ export function useIntegrity(): IntegrityData {
             })
             .then(data => {
                 if (!abortController.signal.aborted) {
-                    setGiniScore(data.giniScore != null ? parseFloat(data.giniScore) : null);
-                    setHhiScore(data.hhiScore != null ? parseFloat(data.hhiScore) : null);
+                    // Parse new response shape: { status, scores: { gini, hhi, syncIndex }, reason, latencyMs }
+                    const scores = data.scores || {};
+                    setGiniScore(scores.gini != null ? parseFloat(scores.gini) : null);
+                    setHhiScore(scores.hhi != null ? parseFloat(scores.hhi) : null);
+                    setSyncIndex(scores.syncIndex != null ? parseFloat(scores.syncIndex) : null);
+                    setReason(data.reason || null);
+                    setLatencyMs(data.latencyMs != null ? parseFloat(data.latencyMs) : null);
                     setStatus(data.status);
                     setLoading(false);
                 }
@@ -49,13 +60,22 @@ export function useIntegrity(): IntegrityData {
             .catch(err => {
                 if (!abortController.signal.aborted) {
                     console.error('Verify error:', err);
-                    setError(err instanceof Error ? err.message : 'Unknown error');
+                    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+                    // Check for network errors or specific connection issues
+                    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('Network request failed')) {
+                        setError('Sentinel Offline - Check RPC Connection');
+                    } else {
+                        setError(errorMessage);
+                    }
                     setLoading(false);
                 }
             });
         } else {
             setGiniScore(null);
             setHhiScore(null);
+            setSyncIndex(null);
+            setReason(null);
+            setLatencyMs(null);
             setStatus(null);
             setError(null);
             setLoading(false);
@@ -66,5 +86,5 @@ export function useIntegrity(): IntegrityData {
         };
     }, [connected, publicKey]);
 
-    return { giniScore, hhiScore, status, loading, error };
+    return { giniScore, hhiScore, syncIndex, reason, latencyMs, status, loading, error };
 }
