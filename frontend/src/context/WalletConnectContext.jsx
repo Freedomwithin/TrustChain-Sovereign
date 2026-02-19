@@ -15,8 +15,8 @@ export const WalletConnectProvider = ({ children }) => {
 
   const connectWallet = useCallback(() => {
     setAccount({ 
-      address: 'osmo1x5lmkv2f5a9m2pkksvx7ddxd6xyu3p7x5elq9n',
-      chainId: 'osmosis-1'
+      address: 'SVRQGjRmizi3Lvv4vHmtW4x6ap7dKs65QVooUdnbZuJ',
+      chainId: 'solana-devnet'
     });
   }, []);
 
