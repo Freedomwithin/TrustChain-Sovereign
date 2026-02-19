@@ -101,7 +101,8 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
     const result = {
       ...(baseData[poolId] || baseData['SOL-USDC']),
       notaryBalance: solBalance,
-      status: solBalance > 0.5 ? 'VERIFIED' : 'PROBATIONARY',
+      // Change 0.5 to 1.2 for the demo flip
+      status: solBalance > 1.2 ? 'VERIFIED' : 'PROBATIONARY',
       lastSync: new Date().toISOString()
     };
 

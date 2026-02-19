@@ -3,9 +3,9 @@
 # 1. POINT TO THE VERIFIED HOME FOLDER
 export PATH="/home/freedomwithin/solana-release/bin:$PATH"
 
-# 2. START BUFFER (10s)
-echo "🎥 Starting Demo in 10 seconds..."
-sleep 5 
+# 2. START BUFFER (s)
+echo "🎥 Starting Demo in 5 seconds..."
+sleep 10 
 
 # 3. THE "WAKE UP" INJECTION (Lower amount to avoid rate limits)
 echo "🛰️  Step 1: Pinging Ledger for Balance Update..."
