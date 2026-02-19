@@ -13,6 +13,12 @@ class RiskAuditorAgent {
    * @param {object} data - The wallet data (transactions, positions, signatures).
    * @returns {object} - The decision object containing status, scores, and reason.
    */
+  static notarizeDecision(address, decision) {
+    if (decision.status === 'SYBIL') {
+      console.error(`[SECURITY EVENT] Sybil detected for wallet: ${address}`);
+    }
+  }
+
   static getIntegrityDecision(address, data) {
     const gini = calculateGini(data.transactions);
     const hhi = calculateHHI(data.positions);
@@ -30,11 +36,15 @@ class RiskAuditorAgent {
       reason = 'High temporal synchronization or extreme value inequality detected.';
     }
 
-    return {
+    const decision = {
       status,
       scores: { gini, hhi, syncIndex },
       reason
     };
+
+    RiskAuditorAgent.notarizeDecision(address, decision);
+
+    return decision;
   }
 }
 
