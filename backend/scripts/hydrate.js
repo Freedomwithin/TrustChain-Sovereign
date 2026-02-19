@@ -22,9 +22,9 @@ async function hydrate() {
   console.log(`Using Notary: ${notary.publicKey.toBase58()}`);
 
   // We want high Gini: 1 Whale and 14 tiny "Dust" transactions
-  const txCount = 15;
-  const whaleAmount = 1.5; // 1.5 SOL Whale
-  const dustAmount = 0.001; // Increased to be above rent-exempt minimum (~0.00089)
+  const txCount = 3;
+  const whaleAmount = 0.005; // The "Test Whale"
+  const dustAmount = 0.001;  // Standard dust// Increased to be above rent-exempt minimum (~0.00089)
 
   for (let i = 0; i < txCount; i++) {
     const isWhale = i === 0;
