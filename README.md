@@ -2,7 +2,7 @@
 
 # TrustChain: Solana-Native Integrity Layer
 
-**Live Demo:** <a href="https://trust-chain-frontend.vercel.app/" target="_blank">Solana-Native Integrity Layer</a> (functional screenshot below)
+**Live Demo:** <a href="https://trustchain-sovereign-frontend.vercel.app/" target="_blank">Solana-Native Integrity Layer</a> (functional screenshot below)
 
 **Status:** Live Fullstack MVP (Solana Mainnet/Testnet Ready)
 
@@ -68,6 +68,13 @@ We have abstracted the security logic into a modular **RiskAuditorAgent**. This 
 - **Precision Constants**: All risk thresholds are moved to static class constants for easier tuning during security audits.
 - **Clean API Surface**: Removed legacy error states to ensure the `notary_sync` process only receives actionable `VERIFIED` or `PROBATIONARY` statuses.
 
+### 4. On-Chain Notary Bridge
+We have successfully deployed the Anchor Notary Program. Integrity scores (Gini/HHI) are now notarized on-chain via PDAs, allowing any Solana protocol to verify a wallet's reputation directly from the ledger without querying our API.
+
+### 5. Composable SDK 
+
+We have launched the @trustchain/web3-react SDK (internal draft). This includes the useTrustChain() hook, enabling partner protocols to integrate "Risk Heartbeat" signals with zero-configuration.
+
 ## Dual Gatekeeper Protocol (Live)
 TrustChain proactively blocks extractive behavior using a two-tier verification system:
 1. **Gini Coefficient:** Detects wealth/liquidity inequality in real-time.
@@ -77,8 +84,8 @@ TrustChain proactively blocks extractive behavior using a two-tier verification 
 - **0-2 Transactions:** Flagged as `PROBATIONARY` (New Entity).
 - **3+ Transactions:** Full Gini/HHI calculation enabled for `VERIFIED` status.
 
-**Backend:** https://trustchainfairtradeintegration.vercel.app/ [Production Vercel]  
-**Frontend:** localhost:3000 [3-pool dashboard screenshot]
+**Backend:** https://trustchain-sovereign-backend-pkog60whz.vercel.app/[Production Vercel]  
+**Frontend:** Frontend: [https://trustchain-sovereign-frontend.vercel.app/](https://trustchain-sovereign-frontend.vercel.app/)
 
 ## What It Does
 TrustChain adds a reputation and integrity layer that enables Osmosis to operate as a trust-aware DEX. Users connect wallets, earn reputation through daily claims, and build verifiable trust scores that power DeFi interactions. No more anonymous trading - reputation becomes your on-chain identity.
@@ -134,7 +141,7 @@ async def check_lp_eligibility(wallet_address, wallet_trades):
 
 **Watch the Live Demo:** <a href="https://vimeo.com/1164908949?share=copy&fl=sv&fe=ci" target="_blank">TrustChain Demo Video on Vimeo</a>
 
-![TrustChain Live UI](assets/trustchain_live_ui.png)
+![TrustChain Live UI](assets/TrustChain_Pronationary_Test_Mode.png)
 
 TrustChain now runs as a **fully working fullstack system** with a live backend integrity API and a frontend risk indicator component.
 
@@ -234,3 +241,8 @@ DM me here or <a href="https://x.com/TrustChainDev/" target="_blank">send me a m
 ## Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests. If you're interested in contributing, please reach out to me directly.
+
+## Version
+- Architect: Jonathon
+- Build Version: 2.1-Sovereign
+- Verification Hash: 0x0cf22b3

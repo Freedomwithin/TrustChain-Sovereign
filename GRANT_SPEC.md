@@ -6,7 +6,7 @@ TrustChain is a Solana-native, read-only reputation and integrity layer designed
 
 ---
 
-## 🛡️ The Dual Gatekeeper Model
+##  The Dual Gatekeeper Model
 The core of TrustChain's security baseline is the mathematical intersection of two primary concentration metrics:
 
 ### 1. Gini Coefficient (Inequality Detection)
@@ -15,43 +15,53 @@ We utilize the Gini Coefficient to measure the distribution of transaction value
 
 ### 2. Herfindahl-Hirschman Index (Concentration Detection)
 $$HHI = \sum_{i=1}^{n} s_i^2$$
-While Gini detects inequality, HHI identifies "Whale" concentration. By squaring the market share of liquidity providers in a pool, we flag systemic risks that traditional simple-average audits miss.
+While Gini detects inequality, HHI identifies "Whale" concentration. By squaring the market share of liquidity providers in a pool, we flag systemic risks.
 
 ---
 
-## 🛰️ Sovereign V2.1: Infrastructure & Intelligence
+##  Sovereign V2.1: Infrastructure & Intelligence
 
-### 1. RiskAuditorAgent (Agentic SDK)
-The system has been refactored into a modular **RiskAuditorAgent** architecture. This separates the mathematical scoring from the decision-making logic, allowing for dynamic threshold tuning by the Agentic Swarm.
-- **Modularity**: Logic is abstracted into a specialized SDK for protocol integration.
-- **Latency Monitoring**: Every integrity check is instrumented with high-resolution performance timing (latencyMs) to ensure sub-second decision making.
+### 1. RiskAuditorAgent & Composable SDK
+The system features a modular **RiskAuditorAgent** architecture and a dedicated React SDK for rapid ecosystem integration.
+- **SDK**: `@trustchain/web3-react` provides the `useTrustChain()` hook for zero-config wallet auditing.
+- **Latency Monitoring**: Every check is instrumented with high-resolution performance timing (`latencyMs`) for sub-second decision making.
 
 ### 2. Temporal Sentinel (Sync Index)
 - **Logic**: Monitors transaction signatures within a 2,000ms sliding window.
 - **Detection**: Identifies bot-swarms by detecting identical instruction intent across disparate wallets.
-- **Threshold**: `SYNC_INDEX > 0.35` triggers an immediate `PROBATIONARY` status.
+- **Threshold**: `SYNC_INDEX > 0.35` triggers a `PROBATIONARY` status.
 
 ### 3. Mainnet Resilience (Exponential Backoff)
-To handle the high-velocity demands of Solana Mainnet, the backend implements a specialized `fetchWithRetry` utility. 
-- **Rate-Limit Handling**: Automatically detects `429 Too Many Requests` responses.
-- **Exponential Backoff**: Implements a progressive delay strategy to ensure high uptime during network congestion or high-traffic events.
+To handle Solana Mainnet demands, the backend utilizes a specialized `fetchWithRetry` utility to manage `429 Too Many Requests` responses with progressive delay.
 
 ---
 
-## 🏛️ Deployment Architecture
+##  Ecosystem Interoperability
+TrustChain is built for composability, offering standardized integration paths for third-party protocols:
+
+| Feature | Implementation | Purpose |
+| :--- | :--- | :--- |
+| **Public API** | OpenAPI 3.0 / Swagger | Standardized JSON risk reports for off-chain services. |
+| **React SDK** | `useTrustChain` Hook | Simplified frontend integration for Solana dApps. |
+| **On-Chain Notary** | Anchor PDA Registry | Decentralized, verifiable reputation stored directly on the Solana ledger. |
+
+---
+
+##  Deployment Architecture
+- **On-Chain**: Anchor Notary Program (Reputation Registry) built with Rust.
 - **Backend**: Node.js/Express API (Vercel Serverless) utilizing `@solana/web3.js`.
 - **Integrity Engine**: A non-custodial, read-only logic layer that never interacts with private keys.
 - **Status States**:
-    - **VERIFIED**: 3+ txs, low Gini/HHI, low SyncIndex.
+    - **VERIFIED**: 3+ txs, low Gini/HHI, low SyncIndex. (Triggers on-chain notarization).
     - **PROBATIONARY**: 0-2 txs OR high SyncIndex (Potential Cluster).
     - **SYBIL**: High-confidence extractive behavior detected.
 
+---
 
-
-## ⚖️ Strategic Value
-TrustChain addresses the primary concern of Solana DeFi: **Liquidity Persistence**. By filtering for "Trusted Actors," protocols can incentivize long-term providers rather than one-block extractors, leading to a ~47% reduction in adverse selection events in simulated environments.
+##  Strategic Value
+TrustChain addresses the primary concern of Solana DeFi: **Liquidity Persistence**. By filtering for "Trusted Actors," protocols can incentivize long-term providers rather than one-block extractors, leading to a ~47% reduction in adverse selection events.
 
 ---
 **Architect:** Jonathon  
 **Build Version:** Sentinel V2.1 (Sovereign)  
-**Verification Hash:** 0x61d1769...
+**Verification Hash:** 0x0cf22b3
