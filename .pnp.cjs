@@ -5917,7 +5917,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/@types-connect-npm-3.4.38-a8a4c38337-10c0.zip/node_modules/@types/connect/",\
         "packageDependencies": [\
           ["@types/connect", "npm:3.4.38"],\
-          ["@types/node", "npm:25.2.3"]\
+          ["@types/node", "npm:25.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -5965,11 +5965,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:25.2.3", {\
-        "packageLocation": "../home/jules/.yarn/berry/cache/@types-node-npm-25.2.3-c8fc40955b-10c0.zip/node_modules/@types/node/",\
+      ["npm:25.3.0", {\
+        "packageLocation": "../home/jules/.yarn/berry/cache/@types-node-npm-25.3.0-543725d5a4-10c0.zip/node_modules/@types/node/",\
         "packageDependencies": [\
-          ["@types/node", "npm:25.2.3"],\
-          ["undici-types", "npm:7.16.0"]\
+          ["@types/node", "npm:25.3.0"],\
+          ["undici-types", "npm:7.18.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6055,7 +6055,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/@types-ws-npm-7.4.7-d0c95c0958-10c0.zip/node_modules/@types/ws/",\
         "packageDependencies": [\
           ["@types/ws", "npm:7.4.7"],\
-          ["@types/node", "npm:25.2.3"]\
+          ["@types/node", "npm:25.3.0"]\
         ],\
         "linkType": "HARD"\
       }],\
@@ -6063,7 +6063,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/@types-ws-npm-8.18.1-61dc106ff0-10c0.zip/node_modules/@types/ws/",\
         "packageDependencies": [\
           ["@types/ws", "npm:8.18.1"],\
-          ["@types/node", "npm:25.2.3"]\
+          ["@types/node", "npm:25.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11987,7 +11987,7 @@ const RAW_RUNTIME_STATE =
           ["@protobufjs/path", "npm:1.1.2"],\
           ["@protobufjs/pool", "npm:1.1.0"],\
           ["@protobufjs/utf8", "npm:1.1.0"],\
-          ["@types/node", "npm:25.2.3"],\
+          ["@types/node", "npm:25.3.0"],\
           ["long", "npm:5.3.2"]\
         ],\
         "linkType": "HARD"\
@@ -13772,10 +13772,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:7.16.0", {\
-        "packageLocation": "../home/jules/.yarn/berry/cache/undici-types-npm-7.16.0-0e23b08124-10c0.zip/node_modules/undici-types/",\
+      ["npm:7.18.2", {\
+        "packageLocation": "../home/jules/.yarn/berry/cache/undici-types-npm-7.18.2-3e6d69d829-10c0.zip/node_modules/undici-types/",\
         "packageDependencies": [\
-          ["undici-types", "npm:7.16.0"]\
+          ["undici-types", "npm:7.18.2"]\
         ],\
         "linkType": "HARD"\
       }],\

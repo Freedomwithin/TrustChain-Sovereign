@@ -40,6 +40,9 @@ const checkSyncIndex = (signatures) => {
   return clusters.length / signatures.length;
 };
 
+/**
+ * @deprecated Use RiskAuditorAgent.getIntegrityDecision instead.
+ */
 const analyzeWalletIntegrity = async (address, data) => {
   const gini = calculateGini(data.transactions);
   const hhi = calculateHHI(data.positions);
