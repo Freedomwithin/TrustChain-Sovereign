@@ -1,32 +1,6 @@
 import React from 'react';
 import './RiskDetail.css';
-
-const TRUSTED_THRESHOLD = 0.1;
-const PROBATIONARY_THRESHOLD = 0.5;
-
-const STATUS_THEMES = {
-  ERROR: { label: 'INSUFFICIENT DATA', className: 'error' },
-  OFFLINE: { label: 'SENTINEL OFFLINE', className: 'error' },
-  VERIFIED: { label: 'TRUSTED ACTOR', className: 'verified' },
-  PROBATIONARY: { label: 'NEW ENTITY', className: 'probationary' },
-  SYBIL: { label: 'POTENTIAL SYBIL 🚨', className: 'sybil' }
-};
-
-const getStatusDisplay = (status, score, error) => {
-  if (error) {
-      return STATUS_THEMES.OFFLINE;
-  }
-  if (status === 'ERROR' || (score == null || Number.isNaN(score)) && !status) {
-    return STATUS_THEMES.ERROR;
-  }
-  if (status === 'VERIFIED') return STATUS_THEMES.VERIFIED;
-  if (status === 'PROBATIONARY') return STATUS_THEMES.PROBATIONARY;
-  if (status === 'SYBIL') return STATUS_THEMES.SYBIL;
-
-  if (score < TRUSTED_THRESHOLD) return STATUS_THEMES.VERIFIED;
-  if (score <= PROBATIONARY_THRESHOLD) return STATUS_THEMES.PROBATIONARY;
-  return STATUS_THEMES.SYBIL;
-};
+import { getStatusDisplay } from '../utils/statusDisplay';
 
 const RiskDetail = ({ status, giniScore, hhiScore, syncIndex, reason, latencyMs, loading, error }) => {
   if (loading) {

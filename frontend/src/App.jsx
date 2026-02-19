@@ -3,32 +3,10 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import Navbar from './components/Navbar.jsx';
 import RiskDetail from './components/RiskDetail.jsx';
 import { useIntegrity } from './hooks/useIntegrity';
+import { getStatusDisplay } from './utils/statusDisplay';
 import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-backend.vercel.app';
-
-export const TRUSTED_THRESHOLD = 0.1;
-export const PROBATIONARY_THRESHOLD = 0.5;
-
-export const STATUS_THEMES = {
-  ERROR: { label: 'INSUFFICIENT DATA', color: 'slate' },
-  VERIFIED: { label: 'TRUSTED ACTOR', color: 'neon-green' },
-  PROBATIONARY: { label: 'NEW ENTITY', color: 'gold' },
-  SYBIL: { label: 'POTENTIAL SYBIL 🚨', color: 'red' }
-};
-
-export const getStatusDisplay = (status, score) => {
-  if (status === 'ERROR' || (score == null || Number.isNaN(score)) && !status) {
-    return STATUS_THEMES.ERROR;
-  }
-  if (status === 'VERIFIED') return STATUS_THEMES.VERIFIED;
-  if (status === 'PROBATIONARY') return STATUS_THEMES.PROBATIONARY;
-  if (status === 'SYBIL') return STATUS_THEMES.SYBIL;
-
-  if (score < TRUSTED_THRESHOLD) return STATUS_THEMES.VERIFIED;
-  if (score <= PROBATIONARY_THRESHOLD) return STATUS_THEMES.PROBATIONARY;
-  return STATUS_THEMES.SYBIL;
-};
 
 function WalletIntegrity() {
   const { connected } = useWallet();
@@ -53,6 +31,7 @@ function WalletIntegrity() {
 function PoolIntegrityBadge({ integrity, loading }) {
   if (loading) return <span className="badge loading">Analyzing...</span>;
 
+  // error prop is undefined here, but getStatusDisplay handles it being undefined/falsy
   const display = getStatusDisplay(integrity?.status, integrity?.extractivenessScore || 0);
 
   return (
