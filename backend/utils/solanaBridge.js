@@ -17,8 +17,8 @@ const IDL = {
         { "name": "systemProgram", "isMut": false, "isSigner": false }
       ],
       "args": [
-        { "name": "giniScore", "type": "u16" },
-        { "name": "hhiScore", "type": "u16" },
+        { "name": "gini_score", "type": "u16" },
+        { "name": "hhi_score", "type": "u16" },
         { "name": "status", "type": "u8" }
       ]
     }
@@ -29,16 +29,20 @@ const IDL = {
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "pubKey", "type": "publicKey" },
-          { "name": "giniScore", "type": "u16" },
-          { "name": "hhiScore", "type": "u16" },
+          { "name": "pub_key", "type": "publicKey" },
+          { "name": "gini_score", "type": "u16" },
+          { "name": "hhi_score", "type": "u16" },
           { "name": "status", "type": "u8" },
-          { "name": "lastUpdated", "type": "i64" }
+          { "name": "last_updated", "type": "i64" }
         ]
       }
     }
   ]
 };
+
+let _connection = null;
+let _program = null;
+let _wallet = null;
 
 function getNotaryKeypair() {
   if (!process.env.NOTARY_SECRET) {
@@ -60,24 +64,58 @@ function getNotaryKeypair() {
   throw new Error("Invalid NOTARY_SECRET format.");
 }
 
+function getProgram() {
+  if (_program) return _program;
+
+  const rpcUrl = process.env.SOLANA_RPC_URL;
+  if (!rpcUrl) {
+    console.warn("SOLANA_RPC_URL not set.");
+    return null;
+  }
+
+  if (!_connection) {
+    _connection = new Connection(rpcUrl, "confirmed");
+  }
+
+  if (!_wallet) {
+    _wallet = new Wallet(getNotaryKeypair());
+  }
+
+  const provider = new AnchorProvider(_connection, _wallet, { preflightCommitment: "confirmed" });
+  _program = new Program(IDL, PROGRAM_ID, provider);
+  return _program;
+}
+
 async function submitNotarization(address, status, gini, hhi) {
   if (process.env.MOCK_MODE === 'true') {
     console.log(`[MOCK] Notarizing ${address} with status ${status}`);
     return "mock-signature";
   }
 
-  const rpcUrl = process.env.SOLANA_RPC_URL;
-  if (!rpcUrl) {
-    console.warn("SOLANA_RPC_URL not set, skipping notarization.");
+  const program = getProgram();
+  if (!program) {
+    console.warn("Skipping notarization: Program not initialized (check RPC URL).");
     return;
   }
 
-  try {
-    const connection = new Connection(rpcUrl, "confirmed");
-    const wallet = new Wallet(getNotaryKeypair());
-    const provider = new AnchorProvider(connection, wallet, { preflightCommitment: "confirmed" });
-    const program = new Program(IDL, PROGRAM_ID, provider);
+  // Status Mapping
+  let statusVal;
+  switch (status) {
+    case 'VERIFIED':
+      statusVal = 1;
+      break;
+    case 'PROBATIONARY':
+      statusVal = 2;
+      break;
+    case 'SYBIL':
+      statusVal = 3;
+      break;
+    default:
+      console.error(`Invalid status '${status}' for notarization. Skipping.`);
+      return;
+  }
 
+  try {
     const userKey = new PublicKey(address);
     const [userIntegrityPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("config"), userKey.toBuffer()],
@@ -88,22 +126,15 @@ async function submitNotarization(address, status, gini, hhi) {
     const giniScore = Math.floor(gini * 10000);
     const hhiScore = Math.floor(hhi * 10000);
 
-    // Status mapping: VERIFIED=1, PROBATIONARY=2, SYBIL=3 (Example)
-    // The Rust code takes u8. We need to agree on mapping.
-    // Based on `notary_sync.ts` example: VERIFIED=1.
-    let statusVal = 0;
-    if (status === 'VERIFIED') statusVal = 1;
-    else if (status === 'PROBATIONARY') statusVal = 2;
-    else if (status === 'SYBIL') statusVal = 3;
-
     console.log(`Notarizing ${address}: Gini=${giniScore}, HHI=${hhiScore}, Status=${statusVal}`);
 
+    // IDL args are snake_case now: gini_score, hhi_score
     const tx = await program.methods
       .updateIntegrity(giniScore, hhiScore, statusVal)
       .accounts({
         userIntegrity: userIntegrityPda,
         user: userKey,
-        notary: wallet.publicKey,
+        notary: _wallet.publicKey,
         systemProgram: web3.SystemProgram.programId,
       })
       .rpc();
