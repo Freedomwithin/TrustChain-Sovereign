@@ -11,9 +11,9 @@ class RiskAuditorAgent {
    * Evaluates wallet integrity based on Gini, HHI, and Sync Index.
    * @param {string} address - The wallet address being analyzed.
    * @param {object} data - The wallet data (transactions, positions, signatures).
-   * @returns {Promise<object>} - The decision object containing status, scores, and reason.
+   * @returns {object} - The decision object containing status, scores, and reason.
    */
-  static async getIntegrityDecision(address, data) {
+  static getIntegrityDecision(address, data) {
     const gini = calculateGini(data.transactions);
     const hhi = calculateHHI(data.positions);
     const syncIndex = checkSyncIndex(data.signatures);

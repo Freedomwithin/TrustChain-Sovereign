@@ -14,7 +14,7 @@ async function testRiskAuditorAgent() {
     positions: [],
     signatures: []
   };
-  const probResult = await RiskAuditorAgent.getIntegrityDecision('addr', probationaryData);
+  const probResult = RiskAuditorAgent.getIntegrityDecision('addr', probationaryData);
   assert.strictEqual(probResult.status, 'PROBATIONARY');
   assert.strictEqual(probResult.reason, 'Insufficient transaction history for full analysis.');
   console.log('PASS: Probationary Logic');
@@ -25,7 +25,7 @@ async function testRiskAuditorAgent() {
     positions: [],
     signatures: [] // SyncIndex 0
   };
-  const sybilResult = await RiskAuditorAgent.getIntegrityDecision('addr', highGiniData);
+  const sybilResult = RiskAuditorAgent.getIntegrityDecision('addr', highGiniData);
   // Gini for 1000, 0, 0:
   // values: 0, 0, 1000. sum=1000. n=3.
   // diffs: |0-0|+|0-1000| + |0-0|+|0-1000| + |1000-0|+|1000-0| = 1000 + 1000 + 1000 + 1000 = 4000.
@@ -43,7 +43,7 @@ async function testRiskAuditorAgent() {
       positions: [],
       signatures: []
   };
-  const extremeResult = await RiskAuditorAgent.getIntegrityDecision('addr', extremeGiniData);
+  const extremeResult = RiskAuditorAgent.getIntegrityDecision('addr', extremeGiniData);
   assert.strictEqual(extremeResult.status, 'SYBIL');
   assert.ok(extremeResult.scores.gini > Configuration.GINI_THRESHOLD, `Gini ${extremeResult.scores.gini} should be > ${Configuration.GINI_THRESHOLD}`);
   console.log('PASS: Sybil Logic (High Gini)');
@@ -63,7 +63,7 @@ async function testRiskAuditorAgent() {
   // checkSyncIndex logic: clusters = diff <= 2.
   // 1000, 1001 (diff 1), 1002 (diff 1), 1003 (diff 1).
   // 3 intervals <= 2. signatures length 4. 3/4 = 0.75 > 0.35
-  const syncResult = await RiskAuditorAgent.getIntegrityDecision('addr', highSyncData);
+  const syncResult = RiskAuditorAgent.getIntegrityDecision('addr', highSyncData);
   assert.strictEqual(syncResult.status, 'SYBIL');
   assert.ok(syncResult.scores.syncIndex > Configuration.PROBATIONARY_SYNC_INDEX_THRESHOLD);
   console.log('PASS: Sybil Logic (High Sync Index)');
@@ -79,7 +79,7 @@ async function testRiskAuditorAgent() {
         { blockTime: 8000 }
     ] // Diff: 1000, 2000, 4000. All > 2. SyncIndex 0.
   };
-  const verifiedResult = await RiskAuditorAgent.getIntegrityDecision('addr', verifiedData);
+  const verifiedResult = RiskAuditorAgent.getIntegrityDecision('addr', verifiedData);
   assert.strictEqual(verifiedResult.status, 'VERIFIED');
   console.log('PASS: Verified Logic');
 }
