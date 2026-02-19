@@ -6,7 +6,8 @@
 
 **Status:** Live Fullstack MVP (Solana Mainnet/Testnet Ready)
 
-![alt text](assets/trustchain_live_ui.png)
+![alt text](assets/merged_demo_screenshot.png)
+
 
 ## The Evolution
 TrustChain has successfully transitioned from an Osmosis-based concept to a **Solana-native reputation and integrity engine**. We solve the "Sybil Gap" in DeFi by cross-referencing on-chain behavior with research-backed concentration metrics.
