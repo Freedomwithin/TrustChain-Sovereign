@@ -4,6 +4,8 @@
 ## Executive Summary
 TrustChain is a Solana-native, read-only reputation and integrity layer designed to bridge the "Sybil Gap" in DeFi protocols. By moving away from static identity (KYC) and toward real-time behavioral analysis, TrustChain provides protocols with a "Risk Heartbeat" for every interacting wallet.
 
+---
+
 ## 🛡️ The Dual Gatekeeper Model
 The core of TrustChain's security baseline is the mathematical intersection of two primary concentration metrics:
 
@@ -15,18 +17,28 @@ We utilize the Gini Coefficient to measure the distribution of transaction value
 $$HHI = \sum_{i=1}^{n} s_i^2$$
 While Gini detects inequality, HHI identifies "Whale" concentration. By squaring the market share of liquidity providers in a pool, we flag systemic risks that traditional simple-average audits miss.
 
-
-
 ---
 
-## 🛰️ Sovereign V2.1: Temporal Sentinel
-The Feb 2026 "Enterprise Hardening" phase introduced the **Synchronization Index**. 
+## 🛰️ Sovereign V2.1: Infrastructure & Intelligence
 
+### 1. RiskAuditorAgent (Agentic SDK)
+The system has been refactored into a modular **RiskAuditorAgent** architecture. This separates the mathematical scoring from the decision-making logic, allowing for dynamic threshold tuning by the Agentic Swarm.
+- **Modularity**: Logic is abstracted into a specialized SDK for protocol integration.
+- **Latency Monitoring**: Every integrity check is instrumented with high-resolution performance timing (latencyMs) to ensure sub-second decision making.
+
+### 2. Temporal Sentinel (Sync Index)
 - **Logic**: Monitors transaction signatures within a 2,000ms sliding window.
 - **Detection**: Identifies bot-swarms by detecting identical instruction intent across disparate wallets.
 - **Threshold**: `SYNC_INDEX > 0.35` triggers an immediate `PROBATIONARY` status.
 
-## Deployment Architecture
+### 3. Mainnet Resilience (Exponential Backoff)
+To handle the high-velocity demands of Solana Mainnet, the backend implements a specialized `fetchWithRetry` utility. 
+- **Rate-Limit Handling**: Automatically detects `429 Too Many Requests` responses.
+- **Exponential Backoff**: Implements a progressive delay strategy to ensure high uptime during network congestion or high-traffic events.
+
+---
+
+## 🏛️ Deployment Architecture
 - **Backend**: Node.js/Express API (Vercel Serverless) utilizing `@solana/web3.js`.
 - **Integrity Engine**: A non-custodial, read-only logic layer that never interacts with private keys.
 - **Status States**:
@@ -34,5 +46,12 @@ The Feb 2026 "Enterprise Hardening" phase introduced the **Synchronization Index
     - **PROBATIONARY**: 0-2 txs OR high SyncIndex (Potential Cluster).
     - **SYBIL**: High-confidence extractive behavior detected.
 
+
+
 ## ⚖️ Strategic Value
 TrustChain addresses the primary concern of Solana DeFi: **Liquidity Persistence**. By filtering for "Trusted Actors," protocols can incentivize long-term providers rather than one-block extractors, leading to a ~47% reduction in adverse selection events in simulated environments.
+
+---
+**Architect:** Jonathon  
+**Build Version:** Sentinel V2.1 (Sovereign)  
+**Verification Hash:** 0x61d1769...
