@@ -344,20 +344,20 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@chain-registry/osmosis", [\
-      ["npm:1.67.306", {\
-        "packageLocation": "../home/jules/.yarn/berry/cache/@chain-registry-osmosis-npm-1.67.306-a55b2df81a-10c0.zip/node_modules/@chain-registry/osmosis/",\
+      ["npm:1.67.307", {\
+        "packageLocation": "../home/jules/.yarn/berry/cache/@chain-registry-osmosis-npm-1.67.307-79a17118fe-10c0.zip/node_modules/@chain-registry/osmosis/",\
         "packageDependencies": [\
-          ["@chain-registry/osmosis", "npm:1.67.306"],\
-          ["@chain-registry/types", "npm:0.50.306"]\
+          ["@chain-registry/osmosis", "npm:1.67.307"],\
+          ["@chain-registry/types", "npm:0.50.307"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@chain-registry/types", [\
-      ["npm:0.50.306", {\
-        "packageLocation": "../home/jules/.yarn/berry/cache/@chain-registry-types-npm-0.50.306-765e7b74a8-10c0.zip/node_modules/@chain-registry/types/",\
+      ["npm:0.50.307", {\
+        "packageLocation": "../home/jules/.yarn/berry/cache/@chain-registry-types-npm-0.50.307-e0f3bec1be-10c0.zip/node_modules/@chain-registry/types/",\
         "packageDependencies": [\
-          ["@chain-registry/types", "npm:0.50.306"]\
+          ["@chain-registry/types", "npm:0.50.307"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -370,7 +370,7 @@ const RAW_RUNTIME_STATE =
           ["@coral-xyz/borsh", "virtual:852da326f150408584798524fe58e9855b987bcc4f041389e1ca13248c23c659c3ffb4a9aa4176cc7542f503f2e1e6422a1f18f69e5e623ca255691d222a55ca#npm:0.29.0"],\
           ["@noble/hashes", "npm:1.8.0"],\
           ["@solana/web3.js", "npm:1.98.4"],\
-          ["bn.js", "npm:5.2.2"],\
+          ["bn.js", "npm:5.2.3"],\
           ["bs58", "npm:4.0.1"],\
           ["buffer-layout", "npm:1.2.2"],\
           ["camelcase", "npm:6.3.0"],\
@@ -399,7 +399,7 @@ const RAW_RUNTIME_STATE =
           ["@coral-xyz/borsh", "virtual:852da326f150408584798524fe58e9855b987bcc4f041389e1ca13248c23c659c3ffb4a9aa4176cc7542f503f2e1e6422a1f18f69e5e623ca255691d222a55ca#npm:0.29.0"],\
           ["@solana/web3.js", "npm:1.98.4"],\
           ["@types/solana__web3.js", null],\
-          ["bn.js", "npm:5.2.2"],\
+          ["bn.js", "npm:5.2.3"],\
           ["buffer-layout", "npm:1.2.2"]\
         ],\
         "packagePeers": [\
@@ -4911,7 +4911,7 @@ const RAW_RUNTIME_STATE =
           ["@solana/buffer-layout", "npm:4.0.1"],\
           ["@solana/codecs-numbers", "virtual:85ca6fd385913f84b1e0e12bc512991a8579fde14d2a196dae95552a08812a69188fa14b9bbeb7abae92cda16f2dd4cdc5ebefffe4b5ec415c4923b3d5279c93#npm:2.3.0"],\
           ["agentkeepalive", "npm:4.6.0"],\
-          ["bn.js", "npm:5.2.2"],\
+          ["bn.js", "npm:5.2.3"],\
           ["borsh", "npm:0.7.0"],\
           ["bs58", "npm:4.0.1"],\
           ["buffer", "npm:6.0.3"],\
@@ -5803,7 +5803,7 @@ const RAW_RUNTIME_STATE =
           ["bitcoin-ops", "npm:1.4.1"],\
           ["blake-hash", "npm:2.0.0"],\
           ["blakejs", "npm:1.2.1"],\
-          ["bn.js", "npm:5.2.2"],\
+          ["bn.js", "npm:5.2.3"],\
           ["bs58", "npm:6.0.0"],\
           ["bs58check", "npm:4.0.0"],\
           ["cashaddrjs", "npm:0.4.4"],\
@@ -7050,7 +7050,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/asn1.js-npm-4.10.1-e813eef12f-10c0.zip/node_modules/asn1.js/",\
         "packageDependencies": [\
           ["asn1.js", "npm:4.10.1"],\
-          ["bn.js", "npm:4.12.2"],\
+          ["bn.js", "npm:4.12.3"],\
           ["inherits", "npm:2.0.4"],\
           ["minimalistic-assert", "npm:1.0.1"]\
         ],\
@@ -7320,17 +7320,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["bn.js", [\
-      ["npm:4.12.2", {\
-        "packageLocation": "../home/jules/.yarn/berry/cache/bn.js-npm-4.12.2-c97b742b8d-10c0.zip/node_modules/bn.js/",\
+      ["npm:4.12.3", {\
+        "packageLocation": "../home/jules/.yarn/berry/cache/bn.js-npm-4.12.3-60404d953d-10c0.zip/node_modules/bn.js/",\
         "packageDependencies": [\
-          ["bn.js", "npm:4.12.2"]\
+          ["bn.js", "npm:4.12.3"]\
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:5.2.2", {\
-        "packageLocation": "../home/jules/.yarn/berry/cache/bn.js-npm-5.2.2-a1a52ffece-10c0.zip/node_modules/bn.js/",\
+      ["npm:5.2.3", {\
+        "packageLocation": "../home/jules/.yarn/berry/cache/bn.js-npm-5.2.3-b71041c01c-10c0.zip/node_modules/bn.js/",\
         "packageDependencies": [\
-          ["bn.js", "npm:5.2.2"]\
+          ["bn.js", "npm:5.2.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7361,7 +7361,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/borsh-npm-0.7.0-c3e1c21bb3-10c0.zip/node_modules/borsh/",\
         "packageDependencies": [\
           ["borsh", "npm:0.7.0"],\
-          ["bn.js", "npm:5.2.2"],\
+          ["bn.js", "npm:5.2.3"],\
           ["bs58", "npm:4.0.1"],\
           ["text-encoding-utf-8", "npm:1.0.2"]\
         ],\
@@ -7470,7 +7470,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/browserify-rsa-npm-4.1.1-0cb8d69af4-10c0.zip/node_modules/browserify-rsa/",\
         "packageDependencies": [\
           ["browserify-rsa", "npm:4.1.1"],\
-          ["bn.js", "npm:5.2.2"],\
+          ["bn.js", "npm:5.2.3"],\
           ["randombytes", "npm:2.1.0"],\
           ["safe-buffer", "npm:5.2.1"]\
         ],\
@@ -7482,7 +7482,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/browserify-sign-npm-4.2.5-a092b1448f-10c0.zip/node_modules/browserify-sign/",\
         "packageDependencies": [\
           ["browserify-sign", "npm:4.2.5"],\
-          ["bn.js", "npm:5.2.2"],\
+          ["bn.js", "npm:5.2.3"],\
           ["browserify-rsa", "npm:4.1.1"],\
           ["create-hash", "npm:1.2.0"],\
           ["create-hmac", "npm:1.1.7"],\
@@ -8073,7 +8073,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/create-ecdh-npm-4.0.4-1048ce2035-10c0.zip/node_modules/create-ecdh/",\
         "packageDependencies": [\
           ["create-ecdh", "npm:4.0.4"],\
-          ["bn.js", "npm:4.12.2"],\
+          ["bn.js", "npm:4.12.3"],\
           ["elliptic", "npm:6.6.1"]\
         ],\
         "linkType": "HARD"\
@@ -8518,7 +8518,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/diffie-hellman-npm-5.0.3-cbef8f3171-10c0.zip/node_modules/diffie-hellman/",\
         "packageDependencies": [\
           ["diffie-hellman", "npm:5.0.3"],\
-          ["bn.js", "npm:4.12.2"],\
+          ["bn.js", "npm:4.12.3"],\
           ["miller-rabin", "npm:4.0.1"],\
           ["randombytes", "npm:2.1.0"]\
         ],\
@@ -8657,7 +8657,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/elliptic-npm-6.6.1-87bb857cbc-10c0.zip/node_modules/elliptic/",\
         "packageDependencies": [\
           ["elliptic", "npm:6.6.1"],\
-          ["bn.js", "npm:4.12.2"],\
+          ["bn.js", "npm:4.12.3"],\
           ["brorand", "npm:1.1.0"],\
           ["hash.js", "npm:1.1.7"],\
           ["hmac-drbg", "npm:1.0.1"],\
@@ -10898,7 +10898,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/miller-rabin-npm-4.0.1-3426ac0bf7-10c0.zip/node_modules/miller-rabin/",\
         "packageDependencies": [\
           ["miller-rabin", "npm:4.0.1"],\
-          ["bn.js", "npm:4.12.2"],\
+          ["bn.js", "npm:4.12.3"],\
           ["brorand", "npm:1.1.0"]\
         ],\
         "linkType": "HARD"\
@@ -12043,7 +12043,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../home/jules/.yarn/berry/cache/public-encrypt-npm-4.0.3-b25e19fada-10c0.zip/node_modules/public-encrypt/",\
         "packageDependencies": [\
           ["public-encrypt", "npm:4.0.3"],\
-          ["bn.js", "npm:4.12.2"],\
+          ["bn.js", "npm:4.12.3"],\
           ["browserify-rsa", "npm:4.1.1"],\
           ["create-hash", "npm:1.2.0"],\
           ["parse-asn1", "npm:5.1.9"],\
@@ -13339,7 +13339,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["tiny-secp256k1", "npm:1.1.7"],\
           ["bindings", "npm:1.5.0"],\
-          ["bn.js", "npm:4.12.2"],\
+          ["bn.js", "npm:4.12.3"],\
           ["create-hmac", "npm:1.1.7"],\
           ["elliptic", "npm:6.6.1"],\
           ["nan", "npm:2.25.0"],\
@@ -13544,7 +13544,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["trustchain-vite", "workspace:frontend"],\
           ["@babel/runtime", "npm:7.28.6"],\
-          ["@chain-registry/osmosis", "npm:1.67.306"],\
+          ["@chain-registry/osmosis", "npm:1.67.307"],\
           ["@eslint/js", "npm:9.39.2"],\
           ["@solana/wallet-adapter-base", "virtual:76a28145f440a2302ce9be9469e2ae5b14ba5103cc2ff13a27941518bb31dc68407f9fa9690693b78e2a40f3e1cc6800efd0c9f42b6724d1b936b39d073e6bb1#npm:0.9.27"],\
           ["@solana/wallet-adapter-react", "virtual:76a28145f440a2302ce9be9469e2ae5b14ba5103cc2ff13a27941518bb31dc68407f9fa9690693b78e2a40f3e1cc6800efd0c9f42b6724d1b936b39d073e6bb1#npm:0.15.39"],\

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Navbar from './components/Navbar.jsx';
 import RiskDetail from './components/RiskDetail.jsx';
+import { useIntegrity } from './hooks/useIntegrity';
 import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-backend.vercel.app';
@@ -17,11 +18,12 @@ export const STATUS_THEMES = {
 };
 
 export const getStatusDisplay = (status, score) => {
-  if (status === 'ERROR' || score == null || Number.isNaN(score)) {
+  if (status === 'ERROR' || (score == null || Number.isNaN(score)) && !status) {
     return STATUS_THEMES.ERROR;
   }
   if (status === 'VERIFIED') return STATUS_THEMES.VERIFIED;
   if (status === 'PROBATIONARY') return STATUS_THEMES.PROBATIONARY;
+  if (status === 'SYBIL') return STATUS_THEMES.SYBIL;
 
   if (score < TRUSTED_THRESHOLD) return STATUS_THEMES.VERIFIED;
   if (score <= PROBATIONARY_THRESHOLD) return STATUS_THEMES.PROBATIONARY;
@@ -29,42 +31,8 @@ export const getStatusDisplay = (status, score) => {
 };
 
 function WalletIntegrity() {
-  const { publicKey, connected } = useWallet();
-  const [giniScore, setGiniScore] = useState(null);
-  const [hhiScore, setHhiScore] = useState(null);
-  const [syncIndex, setSyncIndex] = useState(null);
-  const [reason, setReason] = useState(null);
-  const [status, setStatus] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (connected && publicKey) {
-      setLoading(true);
-      fetch(`${API_BASE_URL}/api/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: publicKey.toBase58() })
-      })
-      .then(res => res.json())
-      .then(data => {
-        setGiniScore(parseFloat(data.giniScore));
-        setHhiScore(parseFloat(data.hhiScore));
-        setSyncIndex(data.syncIndex !== undefined ? parseFloat(data.syncIndex) : null);
-        setReason(data.reason || null);
-        setStatus(data.status);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Verify error:', err);
-        setLoading(false);
-      });
-    } else {
-      setGiniScore(null);
-      setHhiScore(null);
-      setSyncIndex(null);
-      setReason(null);
-    }
-  }, [connected, publicKey]);
+  const { connected } = useWallet();
+  const { giniScore, hhiScore, syncIndex, reason, latencyMs, status, loading, error } = useIntegrity();
 
   if (!connected) return null;
 
@@ -75,7 +43,9 @@ function WalletIntegrity() {
       hhiScore={hhiScore}
       syncIndex={syncIndex}
       reason={reason}
+      latencyMs={latencyMs}
       loading={loading}
+      error={error}
     />
   );
 }
@@ -129,9 +99,8 @@ function App() {
         console.error('Parallel API error:', err);
         setLoadingPools(false);
       });
-  }, []); // Added closing brace for useEffect
+  }, []);
 
-  // RESTORED RETURN BLOCK
   return (
     <div className="App">
       <Navbar />
@@ -155,4 +124,3 @@ function App() {
 }
 
 export default App;
-

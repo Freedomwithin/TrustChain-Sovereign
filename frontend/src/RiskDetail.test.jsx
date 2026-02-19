@@ -28,11 +28,14 @@ const fetchMock = vi.fn((url, options) => {
     return Promise.resolve({
       ok: true,
       json: async () => ({
-        giniScore: 0.5,
-        hhiScore: 0.1,
         status: 'PROBATIONARY',
-        syncIndex: 0.42,
-        reason: 'High syncIndex detected'
+        scores: {
+          gini: '0.5',
+          hhi: '0.1',
+          syncIndex: '0.42'
+        },
+        reason: 'High syncIndex detected',
+        latencyMs: 150
       }),
     });
   }
