@@ -31,15 +31,31 @@ function WalletIntegrity() {
 function PoolIntegrityBadge({ integrity, loading }) {
   if (loading) return <span className="badge loading">Analyzing...</span>;
 
-  // error prop is undefined here, but getStatusDisplay handles it being undefined/falsy
   const display = getStatusDisplay(integrity?.status, integrity?.extractivenessScore || 0);
 
   return (
-    <span className={`badge risk-${display.color}`}>
-      {display.label}
-      <br />
-      <small>Gini: {integrity?.giniScore?.toFixed(3) || '0.500'}</small>
-    </span>
+    <div className={`badge-container risk-${display.color}`}>
+      <span className={`badge risk-${display.color}`}>
+        {display.label}
+      </span>
+      <div className="notary-info" style={{ marginTop: '8px', lineHeight: '1.2' }}>
+        <small style={{ display: 'block', fontSize: '11px', fontWeight: 'bold' }}>
+          Gini: {integrity?.giniScore?.toFixed(3) || '0.500'}
+        </small>
+        <small style={{
+          display: 'block',
+          fontSize: '9px',
+          color: '#00ffa3',
+          opacity: 0.8,
+          fontFamily: 'monospace',
+          marginTop: '4px',
+          borderTop: '1px solid rgba(0, 255, 163, 0.2)',
+          paddingTop: '4px'
+        }}>
+          Notary: SVRQ...nbZuJ
+        </small>
+      </div>
+    </div>
   );
 }
 
