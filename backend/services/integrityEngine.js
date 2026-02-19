@@ -32,7 +32,10 @@ const calculateHHI = (positions) => {
 
 const checkSyncIndex = (signatures) => {
   if (!signatures || signatures.length < 2) return 0;
-  const timestamps = signatures.map(s => s.blockTime).sort();
+  const timestamps = signatures
+    .map(s => s.blockTime)
+    .filter(t => t != null)
+    .sort((a, b) => a - b);
   const clusters = timestamps.filter((t, i) => i > 0 && (t - timestamps[i - 1]) <= 2);
   return clusters.length / signatures.length;
 };
