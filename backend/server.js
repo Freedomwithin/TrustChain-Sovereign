@@ -2,14 +2,16 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
-const { calculateGini, calculateHHI } = require('./integrityEngine');
-const { calculateSyncIndex } = require('./utils/sentinel');
+const { analyzeWalletIntegrity } = require('./services/integrityEngine');
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 // Solana Mainnet RPC
-const rpcEndpoint = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+if (!process.env.SOLANA_RPC_URL) {
+  console.warn('Warning: SOLANA_RPC_URL not set in environment.');
+}
+const rpcEndpoint = process.env.SOLANA_RPC_URL;
 const connection = new Connection(rpcEndpoint, 'confirmed');
 
 // Middleware - Updated origin to match your live Vercel domains
@@ -20,6 +22,20 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// --- Security Middleware ---
+const validateAddress = (req, res, next) => {
+  const { address } = req.params;
+  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+  if (!base58Regex.test(address)) {
+    return res.status(400).json({
+      error: "Invalid Solana Address",
+      message: "Address failed Base58 security validation."
+    });
+  }
+  next();
+};
 
 // --- Root Route (The Sovereign Landing Page) ---
 app.get('/', (req, res) => {
@@ -81,36 +97,16 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
   return res.status(501).json({ error: 'Real integrity check not implemented' });
 });
 
-// --- Wallet Integrity Endpoint ---
-app.post('/api/verify', async (req, res) => {
-  const { address } = req.body;
-  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+// --- Shared Logic ---
+const fetchWalletData = async (address) => {
+  const pubKey = new PublicKey(address);
+  const signatures = await connection.getSignaturesForAddress(pubKey, { limit: 5 });
 
-  if (!address || typeof address !== 'string' || !base58Regex.test(address)) {
-    return res.status(400).json({ error: 'Invalid Solana wallet address format' });
-  }
+  const transactions = [];
+  const positions = [];
 
-  // Hardcoded Testing Cases for Grant Recording
-  if (address === '11111111111111111111111111111111') return res.json({ giniScore: 0.5, status: 'PROBATIONARY' });
-  if (address === '22222222222222222222222222222222') return res.json({ giniScore: 0.1, hhiScore: 0.05, status: 'VERIFIED' });
-
-  try {
-    const pubKey = new PublicKey(address);
-    const signatures = await connection.getSignaturesForAddress(pubKey, { limit: 5 });
-
-    if (signatures.length < 3) {
-      return res.json({
-        giniScore: 0.5,
-        hhiScore: 0,
-        status: 'PROBATIONARY'
-      });
-    }
-
-    const values = [];
-    const timestamps = [];
-    for (const sigInfo of signatures) {
-      if (sigInfo.blockTime) timestamps.push(sigInfo.blockTime);
-      try {
+  for (const sigInfo of signatures) {
+    try {
         await delay(200);
         const tx = await connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
         if (!tx || !tx.meta) continue;
@@ -119,31 +115,64 @@ app.post('/api/verify', async (req, res) => {
         if (accountIndex !== -1) {
           const pre = tx.meta.preBalances[accountIndex] || 0;
           const post = tx.meta.postBalances[accountIndex] || 0;
-          values.push(Math.abs(pre - post));
+          const amount = Math.abs(pre - post);
+          transactions.push({ amount });
+          positions.push({ value: amount });
         }
-      } catch (err) { continue; }
-    }
+    } catch (err) { continue; }
+  }
 
-    const realGini = calculateGini(values);
-    const hhiScore = calculateHHI(values);
-    const { syncIndex } = calculateSyncIndex(timestamps);
+  return { signatures, transactions, positions };
+};
 
-    const trustFactor = Math.min((signatures.length - 2) / 3, 1);
-    const giniScore = (0.5 * (1 - trustFactor)) + (realGini * trustFactor);
+// --- Wallet Integrity Endpoints ---
+app.get('/api/verify/:address', validateAddress, async (req, res) => {
+  const { address } = req.params;
 
-    let status = 'VERIFIED';
-    let reason = undefined;
+  // Global Mock Mode Guard
+  if (process.env.MOCK_MODE === 'true') {
+    return res.json({
+      status: 'VERIFIED',
+      scores: { gini: 0.1, hhi: 0.05, syncIndex: 0.1 },
+      reason: 'Mock verification (Environment MOCK_MODE=true)'
+    });
+  }
 
-    if (syncIndex > 0.35) {
-      status = 'PROBATIONARY';
-      reason = 'High syncIndex detected (Potential Cluster)';
-    }
+  try {
+    const data = await fetchWalletData(address);
+    const result = await analyzeWalletIntegrity(address, data);
+    res.json(result);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
-    return res.json({ giniScore, hhiScore, syncIndex, status, reason });
+app.post('/api/verify', async (req, res) => {
+  const { address } = req.body;
+  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
+  if (!address || typeof address !== 'string' || !base58Regex.test(address)) {
+    return res.status(400).json({ error: 'Invalid Solana wallet address format' });
+  }
+
+  // Global Mock Mode Guard & Hardcoded Cases
+  if (process.env.MOCK_MODE === 'true') {
+    if (address === '11111111111111111111111111111111') return res.json({ status: 'PROBATIONARY', scores: { gini: 0.5 } });
+    return res.json({
+        status: 'VERIFIED',
+        scores: { gini: 0.1, hhi: 0.05, syncIndex: 0.1 },
+        reason: 'Mock verification'
+    });
+  }
+
+  try {
+    const data = await fetchWalletData(address);
+    const result = await analyzeWalletIntegrity(address, data);
+    res.json(result);
   } catch (error) {
     console.error('Error calculating integrity:', error);
-    return res.json({ giniScore: 0.5, hhiScore: 0, status: 'ERROR' });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
