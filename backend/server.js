@@ -2,7 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
-const { analyzeWalletIntegrity } = require('./services/integrityEngine');
+const { RiskAuditorAgent } = require('./agents/RiskAuditorAgent');
+const { fetchWithRetry } = require('./utils/rpc');
+const { performance } = require('perf_hooks');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -100,7 +102,7 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
 // --- Shared Logic ---
 const fetchWalletData = async (address) => {
   const pubKey = new PublicKey(address);
-  const signatures = await connection.getSignaturesForAddress(pubKey, { limit: 5 });
+  const signatures = await fetchWithRetry(() => connection.getSignaturesForAddress(pubKey, { limit: 5 }));
 
   const transactions = [];
   const positions = [];
@@ -108,7 +110,7 @@ const fetchWalletData = async (address) => {
   for (const sigInfo of signatures) {
     try {
         await delay(200);
-        const tx = await connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
+        const tx = await fetchWithRetry(() => connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 }));
         if (!tx || !tx.meta) continue;
 
         const accountIndex = tx.transaction.message.accountKeys.findIndex(key => key.pubkey.toBase58() === address);
@@ -140,7 +142,10 @@ app.get('/api/verify/:address', validateAddress, async (req, res) => {
 
   try {
     const data = await fetchWalletData(address);
-    const result = await analyzeWalletIntegrity(address, data);
+    const start = performance.now();
+    const result = await RiskAuditorAgent.getIntegrityDecision(address, data);
+    const end = performance.now();
+    result.latencyMs = Math.round(end - start);
     res.json(result);
   } catch (error) {
     console.error('Error:', error);
@@ -168,7 +173,10 @@ app.post('/api/verify', async (req, res) => {
 
   try {
     const data = await fetchWalletData(address);
-    const result = await analyzeWalletIntegrity(address, data);
+    const start = performance.now();
+    const result = await RiskAuditorAgent.getIntegrityDecision(address, data);
+    const end = performance.now();
+    result.latencyMs = Math.round(end - start);
     res.json(result);
   } catch (error) {
     console.error('Error calculating integrity:', error);
