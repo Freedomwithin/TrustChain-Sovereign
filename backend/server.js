@@ -3,9 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const { Connection, PublicKey } = require('@solana/web3.js');
 const { RiskAuditorAgent } = require('./agents/RiskAuditorAgent');
+// Note: sentinel.js provides the advanced Max-Signal calculateSyncIndex
+const { calculateGini, calculateHHI } = require('./services/integrityEngine');
+const { calculateSyncIndex } = require('./utils/sentinel');
 const { fetchWithRetry } = require('./utils/rpc');
 const { performance } = require('perf_hooks');
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -26,7 +30,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// --- INSERTED: The "Logic Layer" Visual Root Route ---
+// --- Root Route (Visual Logic Layer) ---
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -36,41 +40,12 @@ app.get('/', (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TrustChain Sentinel | Logic Layer</title>
         <style>
-            body { 
-                background-color: #000; 
-                display: flex; 
-                justify-content: center; 
-                align-items: center; 
-                height: 100vh; 
-                margin: 0; 
-                font-family: 'Courier New', Courier, monospace;
-                color: #00ff9d;
-            }
-            .container {
-                border: 2px solid #00ff9d;
-                padding: 40px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
-                background: rgba(0, 20, 10, 0.1);
-            }
-            .status-glow {
-                display: inline-block;
-                width: 10px;
-                height: 10px;
-                background: #00ff9d;
-                border-radius: 50%;
-                margin-right: 10px;
-                box-shadow: 0 0 10px #00ff9d;
-                animation: pulse 2s infinite;
-            }
+            body { background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Courier New', Courier, monospace; color: #0011ff; }
+            .container { border: 2px solid #0011ff; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 0 20px rgba(44, 24, 160, 0.4); background: rgba(0, 5, 20, 0.2); }
+            .status-glow { display: inline-block; width: 10px; height: 10px; background: #0011ff; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px #0400ff; animation: pulse 2s infinite; }
             h1 { font-size: 1.2rem; letter-spacing: 3px; margin-bottom: 20px; text-transform: uppercase; }
-            .meta { font-size: 0.7rem; opacity: 0.6; margin-top: 20px; }
-            @keyframes pulse {
-                0% { opacity: 1; }
-                50% { opacity: 0.3; }
-                100% { opacity: 1; }
-            }
+            .meta { font-size: 0.7rem; opacity: 0.6; margin-top: 20px; color: #fff; }
+            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         </style>
     </head>
     <body>
@@ -84,7 +59,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// --- Pool Integrity Endpoint ---
+// --- Pool Integrity Endpoint (STRICT) ---
 app.get('/api/pool/:id/integrity', async (req, res) => {
   const poolId = req.params.id;
   try {
@@ -94,75 +69,82 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
       'RAY-SOL': { giniScore: 0.35, topHolders: 5, totalLiquidity: 300000 }
     };
     const notaryAddr = process.env.NOTARY_PUBLIC_KEY || 'JCq7a2E3r4M3aA2xQm4uXpKdV1FBocWLqUqgjLG81Xcg';
-    const notaryPubKey = new PublicKey(notaryAddr);
-    const balance = await connection.getBalance(notaryPubKey);
+    const balance = await connection.getBalance(new PublicKey(notaryAddr));
     const solBalance = balance / 1e9;
-    const result = {
+
+    return res.json({
       ...(baseData[poolId] || baseData['SOL-USDC']),
       notaryBalance: solBalance,
-      status: solBalance >= 0.4 ? 'VERIFIED' : 'PROBATIONARY',
+      status: solBalance >= 1.0 ? 'VERIFIED' : 'PROBATIONARY',
       lastSync: new Date().toISOString()
-    };
-    return res.json(result);
+    });
   } catch (error) {
-    console.error('Integrity Error:', error);
     return res.status(500).json({ error: 'Failed to fetch on-chain integrity state' });
   }
 });
 
-// --- Remaining API Logic (fetchWalletData, verify endpoints, etc.) ---
 const fetchWalletData = async (address) => {
   const pubKey = new PublicKey(address);
   const signatures = await fetchWithRetry(() => connection.getSignaturesForAddress(pubKey, { limit: 15 }));
   const transactions = [];
   const positions = [];
+  const timestamps = [];
+
   for (const sigInfo of signatures) {
     try {
       await delay(200);
       const tx = await fetchWithRetry(() => connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 }));
       if (!tx || !tx.meta) continue;
+
+      if (sigInfo.blockTime) timestamps.push(sigInfo.blockTime);
+
       const accountIndex = tx.transaction.message.accountKeys.findIndex(key => key.pubkey.toBase58() === address);
       if (accountIndex !== -1) {
-        const pre = tx.meta.preBalances[accountIndex] || 0;
-        const post = tx.meta.postBalances[accountIndex] || 0;
-        const amount = Math.abs(pre - post);
+        const amount = Math.abs((tx.meta.preBalances[accountIndex] || 0) - (tx.meta.postBalances[accountIndex] || 0));
         transactions.push({ amount });
         positions.push({ value: amount });
       }
     } catch (err) { continue; }
   }
-  return { signatures, transactions, positions };
+  return { transactions, positions, timestamps };
 };
 
-app.get('/api/verify/:address', async (req, res) => {
-  const { address } = req.params;
-  if (!validateAddress(address)) return res.status(400).json({ error: 'Invalid Solana address format' });
-  try {
-    const data = await fetchWalletData(address);
-    const start = performance.now();
-    const result = RiskAuditorAgent.getIntegrityDecision(address, data);
-    const end = performance.now();
-    res.json({ ...result, latencyMs: Math.round(end - start) });
-  } catch (error) {
-    res.json({ status: 'OFFLINE', scores: { gini: 0, hhi: 0, syncIndex: 0 } });
-  }
-});
-
+// --- Main Verification Logic (The "Institutional" Flow) ---
 app.post('/api/verify', async (req, res) => {
   const { address } = req.body;
+  const start = performance.now();
+
   try {
-    const data = await fetchWalletData(address);
-    const start = performance.now();
-    const result = RiskAuditorAgent.getIntegrityDecision(address, data);
-    const end = performance.now();
-    res.json({ ...result, latencyMs: Math.round(end - start) });
+    const rawData = await fetchWalletData(address);
+
+    // Fetch Economic Weight for the Agent
+    const notaryAddr = process.env.NOTARY_PUBLIC_KEY || 'JCq7a2E3r4M3aA2xQm4uXpKdV1FBocWLqUqgjLG81Xcg';
+    const balance = await connection.getBalance(new PublicKey(notaryAddr));
+    const solBalance = balance / 1e9;
+
+    // 1. Calculate weighted temporal sync (Burst + CV)
+    const sentinelResults = calculateSyncIndex(rawData.timestamps);
+
+    // 2. Build the score object using the weighted syncIndex
+    const scores = {
+      gini: calculateGini(rawData.transactions.map(t => t.amount)),
+      hhi: calculateHHI(rawData.positions.map(p => p.value)),
+      syncIndex: sentinelResults.syncIndex // The Max-Signal value
+    };
+
+    // 3. Final Decision by Agent (Strict 1.0 SOL + Maturity + Behavior)
+    const result = RiskAuditorAgent.getIntegrityDecision(scores, rawData.transactions.length, solBalance);
+
+    res.json({
+      ...result,
+      latencyMs: Math.round(performance.now() - start)
+    });
   } catch (error) {
-    console.error('SENTINEL CRASH:', error);
     res.json({ status: 'OFFLINE', scores: { gini: 0, hhi: 0, syncIndex: 0 } });
   }
 });
 
 module.exports = app;
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, () => console.log(`TrustChain Solana Backend running on port ${port}`));
+  app.listen(port, () => console.log(`TrustChain Sovereign Backend running on port ${port}`));
 }
