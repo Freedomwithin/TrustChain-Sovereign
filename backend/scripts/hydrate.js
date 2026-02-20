@@ -23,7 +23,7 @@ async function hydrate() {
 
   // We want high Gini: 1 Whale and 14 tiny "Dust" transactions
   const txCount = 3;
-  const whaleAmount = 0.006; // The "Test Whale"
+  const whaleAmount = 0.1; // The "Test Whale"
   const dustAmount = 0.001;  // Standard dust// Increased to be above rent-exempt minimum (~0.00089)
 
   for (let i = 0; i < txCount; i++) {

@@ -1,4 +1,5 @@
 #!/bin/bash
+cd "$(dirname "$0")"
 
 # 1. POINT TO THE VERIFIED HOME FOLDER
 export PATH="/home/freedomwithin/solana-release/bin:$PATH"
