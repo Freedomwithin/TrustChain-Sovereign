@@ -102,7 +102,7 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
       ...(baseData[poolId] || baseData['SOL-USDC']),
       notaryBalance: solBalance,
       // Change 0.5 to 1.2 for the demo flip
-      status: solBalance > 1.2 ? 'VERIFIED' : 'PROBATIONARY',
+      status: solBalance > 0.7 ? 'VERIFIED' : 'PROBATIONARY',
       lastSync: new Date().toISOString()
     };
 
