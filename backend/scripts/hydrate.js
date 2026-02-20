@@ -1,36 +1,40 @@
+require('dotenv').config(); // Load this first at the very top
 const {
   Connection,
   Keypair,
   Transaction,
   SystemProgram,
-  LAMPORTS_PER_SOL,
-  PublicKey
+  LAMPORTS_PER_SOL
 } = require('@solana/web3.js');
-const fs = require('fs');
-const path = require('path');
 
 async function hydrate() {
   console.log("🌊 Starting TrustChain High-Inequality Hydration...");
-  
+
   const connection = new Connection("https://api.devnet.solana.com", "confirmed");
-  
-  // Load Notary
-  const secretPath = path.resolve(__dirname, 'SVRQGjRmizi3Lvv4vHmtW4x6ap7dKs65QVooUdnbZuJ.json');
-  const secretKey = Uint8Array.from(JSON.parse(fs.readFileSync(secretPath)));
+
+  // Load Notary from .env
+  const secretString = process.env.NOTARY_SECRET;
+  if (!secretString) {
+    throw new Error("NOTARY_SECRET not found in .env. Ensure your .env file is in the same folder as this script.");
+  }
+
+  // Convert the comma-separated string to the Uint8Array
+  // Note: This works whether your .env has brackets [] or not, 
+  // but it's safest as raw numbers: 128,140...
+  const secretKey = Uint8Array.from(secretString.replace(/[\[\]]/g, '').split(',').map(Number));
   const notary = Keypair.fromSecretKey(secretKey);
 
-  console.log(`Using Notary: ${notary.publicKey.toBase58()}`);
+  console.log(`Using Identity from .env: ${notary.publicKey.toBase58()}`);
 
-  // We want high Gini: 1 Whale and 14 tiny "Dust" transactions
+  // Config: 1 Whale, 2 Dust (Saves SOL while creating disparity)
   const txCount = 3;
-  const whaleAmount = 0.1; // The "Test Whale"
-  const dustAmount = 0.001;  // Standard dust// Increased to be above rent-exempt minimum (~0.00089)
+  const whaleAmount = 0.1;
+  const dustAmount = 0.005;
 
   for (let i = 0; i < txCount; i++) {
     const isWhale = i === 0;
     const amount = isWhale ? whaleAmount : dustAmount;
-    
-    // Generate a perfectly valid random address
+
     const target = Keypair.generate().publicKey;
 
     const transaction = new Transaction().add(
@@ -44,9 +48,9 @@ async function hydrate() {
     try {
       const signature = await connection.sendTransaction(transaction, [notary]);
       await connection.confirmTransaction(signature);
-      console.log(`[${i+1}/${txCount}] ✅ ${isWhale ? 'WHALE' : 'dust'} sent to ${target.toBase58().slice(0,6)}...`);
+      console.log(`[${i + 1}/${txCount}] ✅ ${isWhale ? 'WHALE' : 'dust'} sent: ${amount} SOL to ${target.toBase58().slice(0, 6)}...`);
     } catch (err) {
-      console.error(`❌ Failed on tx ${i+1}:`, err.message);
+      console.error(`❌ Failed on tx ${i + 1}:`, err.message);
     }
   }
 

@@ -9,88 +9,19 @@ const { performance } = require('perf_hooks');
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Solana Mainnet RPC
-if (!process.env.SOLANA_RPC_URL) {
-  console.warn('Warning: SOLANA_RPC_URL not set in environment.');
-}
-const rpcEndpoint = process.env.SOLANA_RPC_URL;
+const rpcEndpoint = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
 const connection = new Connection(rpcEndpoint, 'confirmed');
 
-// Middleware - Updated origin to match your live Vercel domains
 app.use(cors({
-  origin: ['https://trustchain-sovereign-frontend.vercel.app', /\.vercel\.app$/],
+  origin: ['https://trustchain-sovereign-frontend.vercel.app', /\.vercel\.app$/, 'http://localhost:5173'],
   methods: ['GET', 'POST'],
   credentials: true
 }));
 
 app.use(express.json());
 
-// --- Security Middleware ---
-const validateAddress = (req, res, next) => {
-  const { address } = req.params;
-  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-
-  if (!base58Regex.test(address)) {
-    return res.status(400).json({
-      error: "Invalid Solana Address",
-      message: "Address failed Base58 security validation."
-    });
-  }
-  next();
-};
-
-// --- Caching Middleware ---
-const setEdgeCache = (req, res, next) => {
-  res.set('Cache-Control', 's-maxage=1, stale-while-revalidate=5');
-  next();
-};
-
-// --- Root Route (The Sovereign Landing Page) ---
-app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>TrustChain Sentinel | API</title>
-        <style>
-            body { 
-                background: #0a0a0a; color: #00ffa3; font-family: 'Courier New', monospace; 
-                display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; 
-            }
-            .container { 
-                border: 1px solid #00ffa3; padding: 2rem; border-radius: 12px; 
-                box-shadow: 0 0 20px rgba(0, 255, 163, 0.15); text-align: center;
-                max-width: 400px;
-            }
-            .status { color: #fff; margin-bottom: 1.5rem; font-weight: bold; }
-            .pulse { 
-                display: inline-block; width: 12px; height: 12px; background: #00ffa3; 
-                border-radius: 50%; margin-right: 10px; animation: pulse 2s infinite; 
-            }
-            @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
-            .version { font-size: 0.85rem; color: #444; margin-top: 1.5rem; border-top: 1px solid #222; padding-top: 1rem; }
-            h1 { font-size: 1.5rem; letter-spacing: 2px; margin-top: 0; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>TRUSTCHAIN SENTINEL</h1>
-            <div class="status"><span class="pulse"></span> LOGIC LAYER ACTIVE</div>
-            <p>V2.1 Baseline: Weighted Temporal Detection</p>
-            <div class="version">Status: Mainnet-Beta | 17 Days to Grant</div>
-        </div>
-    </body>
-    </html>
-  `);
-});
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// --- Pool Integrity Endpoints ---
-// --- Pool Integrity Endpoints ---
-app.get('/api/pool/:id/integrity', setEdgeCache, async (req, res) => {
+// --- Pool Integrity Endpoint ---
+app.get('/api/pool/:id/integrity', async (req, res) => {
   const poolId = req.params.id;
 
   try {
@@ -100,15 +31,17 @@ app.get('/api/pool/:id/integrity', setEdgeCache, async (req, res) => {
       'RAY-SOL': { giniScore: 0.78, topHolders: 3, totalLiquidity: 300000 }
     };
 
-    const notaryPubKey = new PublicKey('SVRQGjRmizi3Lvv4vHmtW4x6ap7dKs65QVooUdnbZuJ');
+    // Use ENV or fallback to your current active wallet
+    const notaryAddr = process.env.NOTARY_PUBLIC_KEY || '5xwpcxB8ZEuspaa1NhNTCq2ouPmqV9ZJndT9UnYGRDJq';
+    const notaryPubKey = new PublicKey(notaryAddr);
+
     const balance = await connection.getBalance(notaryPubKey);
     const solBalance = balance / 1e9;
 
     const result = {
       ...(baseData[poolId] || baseData['SOL-USDC']),
       notaryBalance: solBalance,
-      // Change 0.5 to 1.2 for the demo flip
-      status: solBalance > 0.6 ? 'VERIFIED' : 'PROBATIONARY',
+      status: solBalance > 0.5 ? 'VERIFIED' : 'PROBATIONARY',
       lastSync: new Date().toISOString()
     };
 

@@ -14,8 +14,10 @@ export const WalletConnectProvider = ({ children }) => {
   }, []);
 
   const connectWallet = useCallback(() => {
-    setAccount({ 
-      address: 'SVRQGjRmizi3Lvv4vHmtW4x6ap7dKs65QVooUdnbZuJ',
+    // Use a Vite env variable so users can change it in their own .env
+    const demoAddress = import.meta.env.VITE_NOTARY_PUBLIC_KEY || '5xwpcxB8ZEuspaa1NhNTCq2ouPmqV9ZJndT9UnYGRDJq';
+    setAccount({
+      address: demoAddress,
       chainId: 'solana-devnet'
     });
   }, []);
@@ -24,12 +26,7 @@ export const WalletConnectProvider = ({ children }) => {
     setAccount(null);
   }, []);
 
-  const value = {
-    account,
-    isReady,
-    connectWallet,
-    disconnectWallet,
-  };
+  const value = { account, isReady, connectWallet, disconnectWallet };
 
   return (
     <WalletConnectContext.Provider value={value}>
