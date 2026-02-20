@@ -32,9 +32,10 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
 
   try {
     const baseData = {
-      'SOL-USDC': { giniScore: 0.25, topHolders: 15, totalLiquidity: 5000000 },
-      'JUP-SOL': { giniScore: 0.42, topHolders: 8, totalLiquidity: 1200000 },
-      'RAY-SOL': { giniScore: 0.78, topHolders: 3, totalLiquidity: 300000 }
+      // Update these to your desired "Verified" baseline for the demo
+      'SOL-USDC': { giniScore: 0.15, topHolders: 12, totalLiquidity: 5000000 },
+      'JUP-SOL': { giniScore: 0.22, topHolders: 8, totalLiquidity: 1200000 },
+      'RAY-SOL': { giniScore: 0.35, topHolders: 5, totalLiquidity: 300000 }
     };
 
     const notaryAddr = process.env.NOTARY_PUBLIC_KEY || '5xwpcxB8ZEuspaa1NhNTCq2ouPmqV9ZJndT9UnYGRDJq';
