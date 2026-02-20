@@ -26,7 +26,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// --- Pool Integrity Endpoint ---
+// --- Pool Integrity Endpoint (Updated for 1.0 SOL Threshold) ---
 app.get('/api/pool/:id/integrity', async (req, res) => {
   const poolId = req.params.id;
 
@@ -37,7 +37,6 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
       'RAY-SOL': { giniScore: 0.78, topHolders: 3, totalLiquidity: 300000 }
     };
 
-    // Use ENV or fallback to your current active wallet
     const notaryAddr = process.env.NOTARY_PUBLIC_KEY || '5xwpcxB8ZEuspaa1NhNTCq2ouPmqV9ZJndT9UnYGRDJq';
     const notaryPubKey = new PublicKey(notaryAddr);
 
@@ -47,7 +46,8 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
     const result = {
       ...(baseData[poolId] || baseData['SOL-USDC']),
       notaryBalance: solBalance,
-      status: solBalance > 0.5 ? 'VERIFIED' : 'PROBATIONARY',
+      // UPDATED: Logic now honors the 1.0 SOL threshold for the video
+      status: solBalance >= 1.0 ? 'VERIFIED' : 'PROBATIONARY',
       lastSync: new Date().toISOString()
     };
 

@@ -1,4 +1,5 @@
-require('dotenv').config(); // Load this first at the very top
+// Replace the top of your hydrate.js with this:
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') }); 
 const {
   Connection,
   Keypair,
@@ -15,18 +16,15 @@ async function hydrate() {
   // Load Notary from .env
   const secretString = process.env.NOTARY_SECRET;
   if (!secretString) {
-    throw new Error("NOTARY_SECRET not found in .env. Ensure your .env file is in the same folder as this script.");
+    // Precise error message for the user
+    throw new Error("NOTARY_SECRET not found. Expected .env at: " + require('path').resolve(__dirname, '../.env'));
   }
 
-  // Convert the comma-separated string to the Uint8Array
-  // Note: This works whether your .env has brackets [] or not, 
-  // but it's safest as raw numbers: 128,140...
   const secretKey = Uint8Array.from(secretString.replace(/[\[\]]/g, '').split(',').map(Number));
   const notary = Keypair.fromSecretKey(secretKey);
 
   console.log(`Using Identity from .env: ${notary.publicKey.toBase58()}`);
 
-  // Config: 1 Whale, 2 Dust (Saves SOL while creating disparity)
   const txCount = 3;
   const whaleAmount = 0.1;
   const dustAmount = 0.005;
@@ -34,7 +32,6 @@ async function hydrate() {
   for (let i = 0; i < txCount; i++) {
     const isWhale = i === 0;
     const amount = isWhale ? whaleAmount : dustAmount;
-
     const target = Keypair.generate().publicKey;
 
     const transaction = new Transaction().add(

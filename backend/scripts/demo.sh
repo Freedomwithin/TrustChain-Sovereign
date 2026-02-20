@@ -1,32 +1,29 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 
-# 1. POINT TO THE VERIFIED PATH (Matches your 'which solana' output)
+# 1. SET THE PATH
 export PATH="/home/freedomwithin/.local/share/solana/install/active_release/bin:$PATH"
 
-# 2. START BUFFER (Rhythm for your AI song)
-echo "🎥 Starting Demo in 10 seconds..."
-sleep 10 
+# 2. START BUFFER (Shortened for pacing)
+echo "🎥 Starting Demo in 3 seconds..."
+sleep 3 
 
-# 3. THE "WAKE UP" INJECTION
-echo "🛰️  Step 1: Pinging Ledger for Balance Update..."
-# Funding your new 5xwpc wallet
-solana airdrop 0.4 5xwpcxB8ZEuspaa1NhNTCq2ouPmqV9ZJndT9UnYGRDJq --url devnet || echo "⚠️ Airdrop rate-limited, continuing with existing balance."
-sleep 10
+# 3. THE "WAKE UP" (Airdrop is fast)
+echo "🛰️  Step 1: Pinging Ledger..."
+solana airdrop 0.4 5xwpcxB8ZEuspaa1NhNTCq2ouPmqV9ZJndT9UnYGRDJq --url devnet > /dev/null 2>&1
+sleep 4
 
-# 4. THE HYDRATION
-echo "🛡️  Step 2: Simulating Whale Cluster (Gini Spike)..."
-# Runs your node script using the .env notary
+# 4. THE HYDRATION (The Gini Spike)
+echo "🛡️  Step 2: Simulating Whale Cluster..."
 node hydrate.js
-sleep 10
+sleep 5 # Brief pause for the block to confirm
 
 # 5. FINAL NOTARY STEP
 echo "🏛️  Step 3: Notarizing Integrity Scores..."
-# Move up to find the services folder
 cd ..
 npx ts-node services/notary_sync.ts
 
-echo "✨ Demo Sequence Complete. Terminal will remain open."
+echo "✨ Demo Sequence Complete. Results Locked."
 
-# 6. THE LOCK: Keeps the results visible on screen
+# 6. KEEP TERMINAL OPEN
 exec $SHELL
