@@ -109,32 +109,38 @@ app.get('/api/verify/:address', validateAddress, setEdgeCache, async (req, res) 
 
 app.post('/api/verify', async (req, res) => {
   const { address } = req.body;
-  const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-
-  if (!address || typeof address !== 'string' || !base58Regex.test(address)) {
-    return res.status(400).json({ error: 'Invalid Solana wallet address format' });
-  }
-
-  // Global Mock Mode Guard & Hardcoded Cases
-  if (process.env.MOCK_MODE === 'true') {
-    if (address === '11111111111111111111111111111111') return res.json({ status: 'PROBATIONARY', scores: { gini: 0.5 } });
-    return res.json({
-        status: 'VERIFIED',
-        scores: { gini: 0.1, hhi: 0.05, syncIndex: 0.1 },
-        reason: 'Mock verification'
-    });
-  }
 
   try {
+    // 1. Fetch the data
     const data = await fetchWalletData(address);
+
+    // 2. SAFETY CHECK: Prevents the 500 crash if wallet is empty
+    if (!data || !data.transactions || data.transactions.length === 0) {
+      return res.json({
+        status: 'PROBATIONARY',
+        scores: { gini: 0, hhi: 0, syncIndex: 0 },
+        reason: 'New Identity: Insufficient history for notarization.'
+      });
+    }
+
+    // 3. Calculation
     const start = performance.now();
     const result = RiskAuditorAgent.getIntegrityDecision(address, data);
     const end = performance.now();
-    result.latencyMs = Math.round(end - start);
-    res.json(result);
+
+    res.json({
+      ...result,
+      latencyMs: Math.round(end - start)
+    });
+
   } catch (error) {
-    console.error('Error calculating integrity:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('SENTINEL CRASH:', error);
+    // Returning a 200 with an error object prevents the CORS/NetworkError
+    res.json({
+      status: 'OFFLINE',
+      error: 'Internal Logic Error',
+      scores: { gini: 0, hhi: 0, syncIndex: 0 }
+    });
   }
 });
 
