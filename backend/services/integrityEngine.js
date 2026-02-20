@@ -20,7 +20,8 @@ const calculateGini = (transactions) => {
 
   if (sumValue === 0) return 0;
   const denominator = 2 * Math.pow(n, 2) * (sumValue / n);
-  return sumDiff / denominator;
+  // Apply small sample size correction for dynamic sensitivity (n / n-1)
+  return (sumDiff / denominator) * (n / (n - 1));
 };
 
 const calculateHHI = (positions) => {

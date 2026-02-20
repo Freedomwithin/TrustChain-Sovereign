@@ -17,7 +17,8 @@ try {
   // abs diffs: |0-0|+|0-10| + |0-0|+|0-10| + |10-0|+|10-0| = 0+10 + 0+10 + 10+10 = 40.
   // 2*n*sum = 2*3*10 = 60.
   // gini = 40/60 = 0.666...
-  assert.ok(Math.abs(gini2 - (2/3)) < 0.001, `Gini should be ~0.666, got ${gini2}`);
+  // Correction: 0.666... * (3/2) = 1.0
+  assert.ok(Math.abs(gini2 - 1.0) < 0.001, `Gini should be 1.0, got ${gini2}`);
   console.log('✅ Gini Tests Passed');
 } catch (e) {
   console.error('❌ Gini Tests Failed:', e.message);
