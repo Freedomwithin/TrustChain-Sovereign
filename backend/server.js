@@ -39,6 +39,12 @@ const validateAddress = (req, res, next) => {
   next();
 };
 
+// --- Caching Middleware ---
+const setEdgeCache = (req, res, next) => {
+  res.set('Cache-Control', 's-maxage=1, stale-while-revalidate=5');
+  next();
+};
+
 // --- Root Route (The Sovereign Landing Page) ---
 app.get('/', (req, res) => {
   res.send(`
@@ -84,7 +90,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // --- Pool Integrity Endpoints ---
 // --- Pool Integrity Endpoints ---
-app.get('/api/pool/:id/integrity', async (req, res) => {
+app.get('/api/pool/:id/integrity', setEdgeCache, async (req, res) => {
   const poolId = req.params.id;
 
   try {
@@ -102,7 +108,7 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
       ...(baseData[poolId] || baseData['SOL-USDC']),
       notaryBalance: solBalance,
       // Change 0.5 to 1.2 for the demo flip
-      status: solBalance > 0.7 ? 'VERIFIED' : 'PROBATIONARY',
+      status: solBalance > 0.6 ? 'VERIFIED' : 'PROBATIONARY',
       lastSync: new Date().toISOString()
     };
 
@@ -116,7 +122,8 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
 // --- Shared Logic ---
 const fetchWalletData = async (address) => {
   const pubKey = new PublicKey(address);
-  const signatures = await fetchWithRetry(() => connection.getSignaturesForAddress(pubKey, { limit: 5 }));
+  // Fetch last 15 transactions for temporal analysis
+  const signatures = await fetchWithRetry(() => connection.getSignaturesForAddress(pubKey, { limit: 15 }));
 
   const transactions = [];
   const positions = [];
@@ -142,7 +149,7 @@ const fetchWalletData = async (address) => {
 };
 
 // --- Wallet Integrity Endpoints ---
-app.get('/api/verify/:address', validateAddress, async (req, res) => {
+app.get('/api/verify/:address', validateAddress, setEdgeCache, async (req, res) => {
   const { address } = req.params;
 
   // Global Mock Mode Guard
