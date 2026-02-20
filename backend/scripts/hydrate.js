@@ -25,9 +25,10 @@ async function hydrate() {
 
   console.log(`Using Identity from .env: ${notary.publicKey.toBase58()}`);
 
+  // Config: 1 Whale, 2 Dust
   const txCount = 3;
-  const whaleAmount = 0.1;
-  const dustAmount = 0.005;
+  const whaleAmount = 0.3; // This will show a major jump in the logs
+  const dustAmount = 0.01;
 
   for (let i = 0; i < txCount; i++) {
     const isWhale = i === 0;

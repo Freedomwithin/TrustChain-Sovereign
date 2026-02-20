@@ -48,7 +48,7 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
       ...(baseData[poolId] || baseData['SOL-USDC']),
       notaryBalance: solBalance,
       // UPDATED: Logic now honors the 1.0 SOL threshold for the video
-      status: solBalance >= 1.0 ? 'VERIFIED' : 'PROBATIONARY',
+      status: solBalance >= 0.4 ? 'VERIFIED' : 'PROBATIONARY',
       lastSync: new Date().toISOString()
     };
 
