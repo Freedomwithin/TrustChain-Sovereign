@@ -39,6 +39,12 @@ const validateAddress = (req, res, next) => {
   next();
 };
 
+// --- Caching Middleware ---
+const setEdgeCache = (req, res, next) => {
+  res.set('Cache-Control', 's-maxage=1, stale-while-revalidate=5');
+  next();
+};
+
 // --- Root Route (The Sovereign Landing Page) ---
 app.get('/', (req, res) => {
   res.send(`
@@ -84,11 +90,8 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // --- Pool Integrity Endpoints ---
 // --- Pool Integrity Endpoints ---
-app.get('/api/pool/:id/integrity', async (req, res) => {
+app.get('/api/pool/:id/integrity', setEdgeCache, async (req, res) => {
   const poolId = req.params.id;
-
-  // Cache-Control for Vercel Edge
-  res.set('Cache-Control', 's-maxage=1, stale-while-revalidate=5');
 
   try {
     const baseData = {
@@ -146,11 +149,8 @@ const fetchWalletData = async (address) => {
 };
 
 // --- Wallet Integrity Endpoints ---
-app.get('/api/verify/:address', validateAddress, async (req, res) => {
+app.get('/api/verify/:address', validateAddress, setEdgeCache, async (req, res) => {
   const { address } = req.params;
-
-  // Cache-Control for Vercel Edge
-  res.set('Cache-Control', 's-maxage=1, stale-while-revalidate=5');
 
   // Global Mock Mode Guard
   if (process.env.MOCK_MODE === 'true') {

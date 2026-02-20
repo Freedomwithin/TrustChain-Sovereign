@@ -4,7 +4,12 @@
  */
 
 const calculateGini = (transactions) => {
-  if (!transactions || transactions.length < 3) return 0.5; // Probationary default
+  // If no transactions, return default probationary score
+  if (!transactions || transactions.length === 0) return 0.5;
+
+  // If very few transactions (1 or 2), return 0 to indicate no inequality (perfect equality with self)
+  // This overrides the previous "Probationary default" for small N to handle the math correctly.
+  if (transactions.length < 3) return 0;
 
   const values = transactions.map(tx => Math.abs(tx.amount)).sort((a, b) => a - b);
   const n = values.length;
@@ -18,10 +23,17 @@ const calculateGini = (transactions) => {
     }
   }
 
-  if (sumValue === 0) return 0;
+  // Ensure n > 1 to avoid division by zero in the small-sample correction
+  if (n <= 1 || sumValue === 0) return 0;
+
   const denominator = 2 * Math.pow(n, 2) * (sumValue / n);
+  const rawGini = sumDiff / denominator;
+
   // Apply small sample size correction for dynamic sensitivity (n / n-1)
-  return (sumDiff / denominator) * (n / (n - 1));
+  const correctedGini = rawGini * (n / (n - 1));
+
+  // Clamp result between [0, 1] for safety
+  return Math.min(Math.max(correctedGini, 0), 1);
 };
 
 const calculateHHI = (positions) => {
