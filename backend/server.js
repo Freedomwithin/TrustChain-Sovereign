@@ -130,8 +130,8 @@ app.post('/api/verify', async (req, res) => {
 
     const sentinelResults = calculateSyncIndex(rawData.timestamps);
     const scores = {
-      gini: calculateGini(rawData.transactions.map(t => t.amount)),
-      hhi: calculateHHI(rawData.positions.map(p => p.value)),
+      gini: calculateGini(rawData.transactions),
+      hhi: calculateHHI(rawData.positions),
       syncIndex: sentinelResults.syncIndex
     };
 
