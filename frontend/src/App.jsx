@@ -17,10 +17,10 @@ function WalletIntegrity() {
 
   // --- 🛡️ INSTITUTIONAL DEMO OVERRIDE ---
   const isDemoWallet = publicKey?.toBase58() === "6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5";
-  
+
   if (isDemoWallet) {
     status = "VERIFIED";
-    giniScore = 0.125; 
+    giniScore = 0.125;
     hhiScore = 0.082;
     syncIndex = 0.150;
     reason = "Institutional Integrity Confirmed via Notary";

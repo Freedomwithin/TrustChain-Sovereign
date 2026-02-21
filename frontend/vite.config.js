@@ -22,5 +22,12 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-  }
+    rollupOptions: {
+      // 🛡️ Bypasses circular dependency loops that crash Vercel builds
+      onwarn(warning, warn) {
+        if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+        warn(warning);
+      },
+    },
+  },
 })

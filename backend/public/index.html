@@ -20,7 +20,7 @@
 
         .container {
             border: 2px solid #0011ff;
-            padding: 50px;
+            padding: 75px;
             border-radius: 4px;
             text-align: center;
             box-shadow: 0 0 30px rgba(0, 17, 255, 0.2);
@@ -30,8 +30,8 @@
 
         .status-glow {
             display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             background: #0011ff;
             border-radius: 50%;
             margin-right: 15px;
@@ -39,7 +39,7 @@
         }
 
         h1 {
-            font-size: 1.5rem;
+            font-size: 2.2rem;
             letter-spacing: 5px;
             margin-bottom: 30px;
             color: #0011ff;
@@ -47,7 +47,7 @@
         }
 
         .label {
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             color: #0011ff;
             font-weight: bold;
             letter-spacing: 2px;
@@ -66,6 +66,10 @@
             animation: scan 4s linear infinite;
         }
 
+        .pulsating-text {
+            animation: text-pulse 2s infinite;
+        }
+
         @keyframes pulse {
 
             0%,
@@ -77,6 +81,20 @@
             50% {
                 opacity: 0.3;
                 box-shadow: 0 0 2px #0011ff;
+            }
+        }
+
+        @keyframes text-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                text-shadow: 0 0 15px #0011ff;
+            }
+
+            50% {
+                opacity: 0.3;
+                text-shadow: 0 0 2px #0011ff;
             }
         }
 
@@ -96,7 +114,8 @@
     <div class="container">
         <div class="scanline"></div>
         <h1>TRUSTCHAIN SENTINEL</h1>
-        <div class="label"><span class="status-glow"></span> LOGIC LAYER ACTIVE</div>
+        <div class="label"><span class="status-glow"></span> <span class="pulsating-text">LOGIC LAYER ACTIVE</span>
+        </div>
     </div>
 </body>
 
