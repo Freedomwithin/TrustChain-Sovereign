@@ -37,10 +37,9 @@ sleep 10
 
 # --- 6. FINAL NOTARY STEP ---
 echo "🏛️  Step 3: Notarizing Integrity Scores to PDA..."
-# Stay in the current directory, but point npx at the absolute path
-# This prevents 'MODULE_NOT_FOUND' by being explicit
-cd "$BACKEND_DIR"
-npx --yes ts-node "$BACKEND_DIR/services/notary_sync.ts"
+# We run from the root, but target the backend workspace explicitly.
+# Yarn 4 will ensure the backend's local environment is loaded.
+yarn workspace trustchain-backend tsx services/notary_sync.ts
 
 alert_user # Final ding: Verified state ready.
 

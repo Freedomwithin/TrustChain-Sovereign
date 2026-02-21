@@ -13,9 +13,12 @@ export const WalletConnectProvider = ({ children }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const connectWallet = useCallback(() => {
-    // Update this to your 6QsE address
-    const demoAddress = import.meta.env.VITE_NOTARY_PUBLIC_KEY || '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5';
+  const connectWallet = useCallback((manualAddress = null) => {
+    // Use the passed address, or the Notary, or the Vercel Env
+    const demoAddress = manualAddress ||
+      import.meta.env.VITE_NOTARY_PUBLIC_KEY ||
+      '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5';
+
     setAccount({
       address: demoAddress,
       chainId: 'solana-devnet'
