@@ -14,8 +14,8 @@ export const WalletConnectProvider = ({ children }) => {
   }, []);
 
   const connectWallet = useCallback(() => {
-    // Use a Vite env variable so users can change it in their own .env
-    const demoAddress = import.meta.env.VITE_NOTARY_PUBLIC_KEY || '5xwpcxB8ZEuspaa1NhNTCq2ouPmqV9ZJndT9UnYGRDJq';
+    // Update this to your 6QsE address
+    const demoAddress = import.meta.env.VITE_NOTARY_PUBLIC_KEY || '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5';
     setAccount({
       address: demoAddress,
       chainId: 'solana-devnet'
