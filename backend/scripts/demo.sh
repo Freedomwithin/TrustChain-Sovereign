@@ -1,4 +1,5 @@
 #!/bin/bash
+# test for vercel
 # TrustChain Sovereign: Institutional Demo Sequence
 cd "$(dirname "$0")"
 
