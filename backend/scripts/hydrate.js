@@ -6,35 +6,57 @@ const {
   SystemProgram,
   LAMPORTS_PER_SOL
 } = require('@solana/web3.js');
+const fs = require('fs');
+const path = require('path');
 
 async function hydrate() {
   console.log("🌊 Starting TrustChain High-Inequality Hydration...");
 
   const connection = new Connection("https://api.devnet.solana.com", "confirmed");
 
-  // 1. Load Notary from .env
+  // 1. Setup Logging Path
+  const logDir = "/home/freedomwithin/Documents/Tech/1_GitHub_Reops/TrustChain_documentation/Wallets-Testing";
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const logFileName = `demo_cluster_${timestamp}.json`;
+  const logPath = path.join(logDir, logFileName);
+
+  // Ensure directory exists
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+
+  // 2. Load Notary from .env
   const secretString = process.env.NOTARY_SECRET;
   if (!secretString) {
     throw new Error("NOTARY_SECRET not found. Expected .env at: " + require('path').resolve(__dirname, '../.env'));
   }
 
-  // Regex fix for both comma-separated and bracketed secret strings
   const secretKey = Uint8Array.from(secretString.replace(/[\[\]]/g, '').split(',').map(Number));
   const notary = Keypair.fromSecretKey(secretKey);
 
   console.log(`Using Identity: ${notary.publicKey.toBase58()}`);
 
-  // 2. Scenario Config: 1 Whale (High Concentration), 2 Dust (Noise)
+  // 3. Scenario Config
   const txCount = 3;
   const whaleAmount = 0.3;
   const dustAmount = 0.01;
+  const clusterLog = [];
 
   for (let i = 0; i < txCount; i++) {
     const isWhale = i === 0;
     const amount = isWhale ? whaleAmount : dustAmount;
-    const target = Keypair.generate().publicKey;
 
-    // Get the latest blockhash for the confirmation strategy
+    // Generate burner keypair
+    const burnerKeypair = Keypair.generate();
+    const target = burnerKeypair.publicKey;
+
+    // Record keys for later recovery/verification
+    clusterLog.push({
+      role: isWhale ? 'WHALE' : 'dust',
+      address: target.toBase58(),
+      secretKey: Array.from(burnerKeypair.secretKey)
+    });
+
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 
     const transaction = new Transaction({
@@ -51,7 +73,6 @@ async function hydrate() {
     try {
       const signature = await connection.sendTransaction(transaction, [notary]);
 
-      // Modern Confirmation Strategy (Safe for 2026 standards)
       await connection.confirmTransaction({
         signature,
         blockhash,
@@ -59,12 +80,25 @@ async function hydrate() {
       }, 'confirmed');
 
       console.log(`[${i + 1}/${txCount}] ✅ ${isWhale ? 'WHALE' : 'dust'} sent: ${amount} SOL to ${target.toBase58().slice(0, 6)}...`);
+
+      // 10-second "Human Behavior" sleep to lower SyncIndex
+      if (i < txCount - 1) {
+        console.log("⏳ Sleeping 10s for temporal entropy...");
+        await new Promise(resolve => setTimeout(resolve, 10000));
+      }
+
     } catch (err) {
       console.error(`❌ Failed on tx ${i + 1}:`, err.message);
     }
   }
 
-  console.log("\n✨ Hydration Complete. Gini/HHI inequality scores are now live on-chain.");
+  // 4. Save Cluster Data
+  fs.writeFileSync(logPath, JSON.stringify(clusterLog, null, 2));
+
+  console.log("\n----------------------------------------------------");
+  console.log(`📂 CLUSTER DATA SAVED: ${logPath}`);
+  console.log("✨ Hydration Complete. Gini/HHI scores live on-chain.");
+  console.log("----------------------------------------------------");
 }
 
 hydrate().catch(console.error);

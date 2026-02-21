@@ -2,36 +2,50 @@
 # TrustChain Sovereign: Institutional Demo Sequence
 cd "$(dirname "$0")"
 
-# 1. SET THE PATH (Sovereign Local)
+# --- 1. SET THE BASE DIRECTORY (Institutional Grounding) ---
+# This ensures we always know where the backend root is
+BACKEND_DIR=$(cd ".." && pwd)
+SCRIPTS_DIR=$(pwd)
+
+# --- 2. SET THE PATHS ---
 export PATH="/home/freedomwithin/.local/share/solana/install/active_release/bin:$PATH"
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm use v25.6.0 > /dev/null
 
-# 2. START BUFFER (The "Focus" Window)
+alert_user() {
+    paplay /usr/share/sounds/freedesktop/stereo/complete.oga 2>/dev/null || echo -e "\a"
+}
+
+# --- 3. START BUFFER ---
 echo "🎥 Starting Demo in 10 seconds..."
-echo "Identity: 6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5"
+alert_user
 sleep 10
 
-# 3. THE "WAKE UP" (Establish Initial History)
+# --- 4. THE "WAKE UP" ---
 echo "🛰️  Step 1: Pinging Ledger (Initial Airdrop)..."
-# Using 0.4 to keep balance high but realistic
 solana airdrop 0.4 6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5 --url devnet > /dev/null 2>&1
+alert_user
 sleep 10
 
-# 4. THE HYDRATION (The Behavioral Pattern)
+# --- 5. THE HYDRATION ---
 echo "🛡️  Step 2: Simulating Behavioral Cluster (Whale vs. Dust)..."
-# This runs your Gini/HHI engine logic
-node hydrate.js
-sleep 10 # Essential for Block Confirmation and Sentinel Analysis
+# Run from the scripts directory
+node "$SCRIPTS_DIR/hydrate.js"
+alert_user 
+sleep 10 
 
-# 5. FINAL NOTARY STEP (On-Chain Finality)
+# --- 6. FINAL NOTARY STEP ---
 echo "🏛️  Step 3: Notarizing Integrity Scores to PDA..."
-# Moving to root to ensure ts-node finds the Sovereign services
-cd ..
-npx ts-node services/notary_sync.ts
+# Stay in the current directory, but point npx at the absolute path
+# This prevents 'MODULE_NOT_FOUND' by being explicit
+cd "$BACKEND_DIR"
+npx --yes ts-node "$BACKEND_DIR/services/notary_sync.ts"
+
+alert_user # Final ding: Verified state ready.
 
 echo "----------------------------------------------------"
 echo "✨ Demo Sequence Complete. Results Locked on Devnet."
-echo "Logic Layer Active. Check Dashboard for Verified Status."
 echo "----------------------------------------------------"
 
-# 6. KEEP TERMINAL OPEN FOR LOGS
 exec $SHELL
