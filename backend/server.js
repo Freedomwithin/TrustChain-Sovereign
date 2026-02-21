@@ -3,6 +3,7 @@ console.log("🏛️ [SENTINEL] System Boot: Initializing Logic Layer...");
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { Connection, PublicKey } = require('@solana/web3.js');
 const { RiskAuditorAgent } = require('./agents/RiskAuditorAgent');
 const { calculateGini, calculateHHI } = require('./services/integrityEngine');
@@ -28,7 +29,7 @@ const validateAddress = (address) => {
 // 🏛️ DYNAMIC CORS CONFIGURATION
 app.use(cors({
   origin: [
-    process.env.CORS_ORIGIN, // Pulls from Vercel Dashboard
+    process.env.CORS_ORIGIN,
     'https://trustchain-sovereign-frontend.vercel.app',
     /\.vercel\.app$/,
     'http://localhost:5173'
@@ -39,8 +40,10 @@ app.use(cors({
 
 app.use(express.json());
 
-// --- Core Verification Logic ---
+// 🏛️ STATIC FILE SERVING (Ensures Workspace 2 looks correct)
+app.use(express.static(path.join(__dirname, 'public')));
 
+// --- Core Verification Logic ---
 const fetchWalletData = async (address) => {
   const pubKey = new PublicKey(address);
   const signatures = await fetchWithRetry(() => connection.getSignaturesForAddress(pubKey, { limit: 15 }));
@@ -69,10 +72,36 @@ const fetchWalletData = async (address) => {
 
 // --- Routes ---
 
+// Serve the Visual Status Page
 app.get('/', (req, res) => {
-  res.send('<h1>TRUSTCHAIN SENTINEL LOGIC LAYER ACTIVE</h1>');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Pool Integrity Endpoint (For the status ticker)
+app.get('/api/pool/:id/integrity', async (req, res) => {
+  const poolId = req.params.id;
+  try {
+    const baseData = {
+      'SOL-USDC': { giniScore: 0.15, topHolders: 12, totalLiquidity: 5000000 },
+      'JUP-SOL': { giniScore: 0.22, topHolders: 8, totalLiquidity: 1200000 },
+      'RAY-SOL': { giniScore: 0.35, topHolders: 5, totalLiquidity: 300000 }
+    };
+    const notaryAddr = process.env.NOTARY_PUBLIC_KEY || '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5';
+    const balance = await connection.getBalance(new PublicKey(notaryAddr));
+    const solBalance = balance / 1e9;
+
+    return res.json({
+      ...(baseData[poolId] || baseData['SOL-USDC']),
+      notaryBalance: solBalance,
+      status: solBalance >= 1.0 ? 'VERIFIED' : 'PROBATIONARY',
+      lastSync: new Date().toISOString()
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch on-chain state' });
+  }
+});
+
+// Main Verification Route
 app.post('/api/verify', async (req, res) => {
   const { address } = req.body;
   const start = performance.now();
@@ -117,7 +146,7 @@ app.post('/api/verify', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`🏛️ SENTINEL ACTIVE ON PORT ${port}`);
+  console.log(`🏛️  SENTINEL ACTIVE ON PORT ${port}`);
 });
 
 module.exports = app;
