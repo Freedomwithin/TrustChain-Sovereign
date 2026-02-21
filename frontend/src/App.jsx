@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+window.Buffer = window.Buffer || Buffer;
 import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Navbar from './components/Navbar.jsx';

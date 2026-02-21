@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "build": "echo 'Backend build complete' && node -v",
     "test": "node test.js && node tests/security.test.js",
     "test:engine": "node test.js",
     "sync:notary": "tsx services/notary_sync.ts"

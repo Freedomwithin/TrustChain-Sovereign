@@ -7,7 +7,15 @@
         "backend",
         "frontend"
     ],
+    "scripts": {
+        "build:frontend": "yarn workspace trustchain-vite build",
+        "build:backend": "yarn workspace trustchain-backend build",
+        "dev": "yarn workspaces foreach -Api run dev"
+    },
     "devDependencies": {
         "webpack-bundle-analyzer": "^4.10.2"
+    },
+    "dependencies": {
+        "uuid": "^13.0.0"
     }
 }

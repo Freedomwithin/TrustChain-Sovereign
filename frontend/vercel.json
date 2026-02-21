@@ -1,7 +1,13 @@
 {
   "framework": "vite",
-  "buildCommand": "vite build",
-  "outputDirectory": "build",
-  "devCommand": "vite",
-  "installCommand": "npm install"
+  "buildCommand": "yarn workspace trustchain-vite build",
+  "outputDirectory": "dist",
+  "devCommand": "yarn workspace trustchain-vite dev",
+  "installCommand": "yarn install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
