@@ -1,5 +1,4 @@
-// Replace the top of your hydrate.js with this:
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') }); 
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const {
   Connection,
   Keypair,
@@ -13,21 +12,21 @@ async function hydrate() {
 
   const connection = new Connection("https://api.devnet.solana.com", "confirmed");
 
-  // Load Notary from .env
+  // 1. Load Notary from .env
   const secretString = process.env.NOTARY_SECRET;
   if (!secretString) {
-    // Precise error message for the user
     throw new Error("NOTARY_SECRET not found. Expected .env at: " + require('path').resolve(__dirname, '../.env'));
   }
 
+  // Regex fix for both comma-separated and bracketed secret strings
   const secretKey = Uint8Array.from(secretString.replace(/[\[\]]/g, '').split(',').map(Number));
   const notary = Keypair.fromSecretKey(secretKey);
 
-  console.log(`Using Identity from .env: ${notary.publicKey.toBase58()}`);
+  console.log(`Using Identity: ${notary.publicKey.toBase58()}`);
 
-  // Config: 1 Whale, 2 Dust
+  // 2. Scenario Config: 1 Whale (High Concentration), 2 Dust (Noise)
   const txCount = 3;
-  const whaleAmount = 0.3; // This will show a major jump in the logs
+  const whaleAmount = 0.3;
   const dustAmount = 0.01;
 
   for (let i = 0; i < txCount; i++) {
@@ -35,7 +34,13 @@ async function hydrate() {
     const amount = isWhale ? whaleAmount : dustAmount;
     const target = Keypair.generate().publicKey;
 
-    const transaction = new Transaction().add(
+    // Get the latest blockhash for the confirmation strategy
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+
+    const transaction = new Transaction({
+      feePayer: notary.publicKey,
+      recentBlockhash: blockhash
+    }).add(
       SystemProgram.transfer({
         fromPubkey: notary.publicKey,
         toPubkey: target,
@@ -45,7 +50,14 @@ async function hydrate() {
 
     try {
       const signature = await connection.sendTransaction(transaction, [notary]);
-      await connection.confirmTransaction(signature);
+
+      // Modern Confirmation Strategy (Safe for 2026 standards)
+      await connection.confirmTransaction({
+        signature,
+        blockhash,
+        lastValidBlockHeight
+      }, 'confirmed');
+
       console.log(`[${i + 1}/${txCount}] ✅ ${isWhale ? 'WHALE' : 'dust'} sent: ${amount} SOL to ${target.toBase58().slice(0, 6)}...`);
     } catch (err) {
       console.error(`❌ Failed on tx ${i + 1}:`, err.message);
