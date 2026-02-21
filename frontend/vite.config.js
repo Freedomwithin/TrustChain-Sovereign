@@ -4,8 +4,11 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    port: 5173, // Standard Vite port
+  },
   define: {
-    'process.env': {},
+    // DO NOT set 'process.env': {} here, it breaks env loading.
     'global': 'globalThis',
   },
   plugins: [
