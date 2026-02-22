@@ -6,8 +6,6 @@ const cors = require('cors');
 const path = require('path');
 const { Connection, PublicKey } = require('@solana/web3.js');
 const { RiskAuditorAgent } = require('./agents/RiskAuditorAgent');
-const { calculateGini, calculateHHI } = require('./services/integrityEngine');
-const { calculateSyncIndex } = require('./utils/sentinel');
 const { fetchWithRetry } = require('./utils/rpc');
 const { performance } = require('perf_hooks');
 
@@ -26,7 +24,6 @@ const validateAddress = (address) => {
   return solanaRegex.test(address);
 };
 
-// 🏛️ DYNAMIC CORS CONFIGURATION
 app.use(cors({
   origin: [
     process.env.CORS_ORIGIN,
@@ -39,11 +36,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
-// 🏛️ STATIC FILE SERVING (Ensures Workspace 2 looks correct)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- Core Verification Logic ---
+// --- Core Data Fetching ---
 const fetchWalletData = async (address) => {
   const pubKey = new PublicKey(address);
   const signatures = await fetchWithRetry(() => connection.getSignaturesForAddress(pubKey, { limit: 15 }));
@@ -67,17 +62,16 @@ const fetchWalletData = async (address) => {
       }
     } catch (err) { continue; }
   }
-  return { transactions, positions, timestamps };
+  return { transactions, positions, timestamps, signatures };
 };
 
 // --- Routes ---
 
-// Serve the Visual Status Page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Pool Integrity Endpoint (For the status ticker)
+// Pool Integrity Endpoint (Retaining logic from Main)
 app.get('/api/pool/:id/integrity', async (req, res) => {
   const poolId = req.params.id;
   try {
@@ -93,54 +87,32 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
     return res.json({
       ...(baseData[poolId] || baseData['SOL-USDC']),
       notaryBalance: solBalance,
-      status: solBalance >= 1.0 ? 'VERIFIED' : 'PROBATIONARY',
+      status: solBalance >= 0.05 ? 'ONLINE' : 'LOW_FUNDS',
       lastSync: new Date().toISOString()
     });
   } catch (error) {
-    return res.status(500).json({ error: 'Failed to fetch on-chain state' });
+    return res.status(500).json({ error: 'Failed to fetch pool state' });
   }
 });
 
-// Main Verification Route
+// Main Verification Route (Refactored for Feature branch Agent)
 app.post('/api/verify', async (req, res) => {
   const { address } = req.body;
   const start = performance.now();
 
   if (!validateAddress(address)) return res.status(400).json({ status: 'INVALID_ADDRESS' });
 
-  const DEMO_WALLETS = [
-    'JCq7a2E3r4M3aA2xQm4uXpKdV1FBocWLqUqgjLG81Xcg',
-    '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5'
-  ];
-
-  if (DEMO_WALLETS.includes(address)) {
-    return res.json({
-      status: 'VERIFIED',
-      scores: { gini: 0.12, hhi: 0.05, syncIndex: 0.98 },
-      decision: 'AUTHORIZED_INSTITUTIONAL_ACTOR',
-      latencyMs: Math.round(performance.now() - start)
-    });
-  }
-
   try {
-    const rawData = await fetchWalletData(address);
-    const notaryAddr = process.env.NOTARY_PUBLIC_KEY || '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5';
-    const balance = await connection.getBalance(new PublicKey(notaryAddr));
-    const solBalance = balance / 1e9;
-
-    const sentinelResults = calculateSyncIndex(rawData.timestamps);
-    const scores = {
-      gini: calculateGini(rawData.transactions),
-      hhi: calculateHHI(rawData.positions),
-      syncIndex: sentinelResults.syncIndex
-    };
-
-    const result = RiskAuditorAgent.getIntegrityDecision(scores, rawData.transactions.length, solBalance);
-    res.json({
-      ...result,
-      latencyMs: Math.round(performance.now() - start)
-    });
+    const data = await fetchWalletData(address);
+    // Call the newly async getIntegrityDecision from the merged Agent
+    const result = await RiskAuditorAgent.getIntegrityDecision(address, data);
+    
+    const end = performance.now();
+    result.latencyMs = Math.round(end - start);
+    
+    res.json(result);
   } catch (error) {
+    console.error("Verification error:", error);
     res.json({ status: 'OFFLINE', scores: { gini: 0, hhi: 0, syncIndex: 0 } });
   }
 });
