@@ -1,190 +1,185 @@
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  Transaction,
-  SystemProgram,
-  TransactionInstruction,
-} from "@solana/web3.js";
-import * as nacl from "tweetnacl";
-import crypto from "crypto";
+import * as path from "path";
+import * as fs from "fs";
 import dotenv from "dotenv";
-import { RiskAuditorAgent, TemporalObserver } from "../agents/core/base_agent";
+import {
+    Connection,
+    Keypair,
+    PublicKey,
+    Transaction,
+    SystemProgram,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { Program, AnchorProvider, Wallet, Idl, BN } from "@coral-xyz/anchor";
+import { createRequire } from 'module';
 
-dotenv.config();
+const require = createRequire(import.meta.url);
+const { calculateGini, calculateHHI } = require('./integrityEngine.js');
+const { fetchWithRetry } = require('../utils/rpc.js');
 
-// Mock data
-const MOCK_WALLET = new PublicKey("11111111111111111111111111111111");
+// 1. Sovereign Environment Resolution
+const envPaths = [
+    path.resolve(__dirname, "../.env.local"),
+    path.resolve(__dirname, "../.env"),
+    path.resolve(__dirname, "../../.env")
+];
 
-// Load Notary Secret from Environment Variable
-if (!process.env.NOTARY_SECRET) {
-    throw new Error("NOTARY_SECRET environment variable not set. Please set it in .env file.");
+let envLoaded = false;
+for (const envPath of envPaths) {
+    if (fs.existsSync(envPath)) {
+        dotenv.config({ path: envPath });
+        console.log(`📡 [SENTINEL] Environment Loaded: ${path.basename(envPath)}`);
+        envLoaded = true;
+        break;
+    }
 }
 
-// Support both JSON array format and Hex string format for convenience
-let notarySecret: Uint8Array;
+if (!envLoaded) {
+    console.error("❌ ERROR: No .env or .env.local found. System ungrounded.");
+    process.exit(1);
+}
+
+// 2. Resolve Notary Identity
+const secretString = process.env.NOTARY_SECRET || "";
+let NOTARY_KEYPAIR: Keypair;
+
 try {
-    const parsed = JSON.parse(process.env.NOTARY_SECRET);
-    if (Array.isArray(parsed)) {
-        notarySecret = new Uint8Array(parsed);
-    } else {
-        throw new Error("NOTARY_SECRET JSON is not an array");
+    const cleanString = secretString.replace(/[\[\]"\s]/g, '');
+    const secretBytes = Uint8Array.from(cleanString.split(',').map(Number));
+
+    if (secretBytes.length !== 64) {
+        throw new Error(`Invalid byte length: ${secretBytes.length}`);
     }
+
+    NOTARY_KEYPAIR = Keypair.fromSecretKey(secretBytes);
 } catch (e) {
-    // If not JSON, try Hex
-    // Remove '0x' prefix if present
-    const cleanHex = process.env.NOTARY_SECRET.replace(/^0x/, '');
-    if (/^[0-9a-fA-F]+$/.test(cleanHex)) {
-         notarySecret = Uint8Array.from(Buffer.from(cleanHex, 'hex'));
-    } else {
-        throw new Error("Invalid NOTARY_SECRET format. Must be JSON array of numbers or Hex string.");
-    }
+    console.error("❌ ERROR: Could not parse NOTARY_SECRET. Ensure it is a 64-byte array string.");
+    process.exit(1);
 }
 
-const NOTARY_KEYPAIR = Keypair.fromSecretKey(notarySecret);
-
-// Placeholder Program ID from lib.rs
+// 3. Constants & Connection
+const rpcUrl = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
+const connection = new Connection(rpcUrl, "confirmed");
+const TARGET_WALLET = new PublicKey("6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5");
 const PROGRAM_ID = new PublicKey("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
-interface IntegrityScore {
-  gini: number;
-  hhi: number;
-  status: string;
-  syncIndex?: number;
-}
+console.log(`🏛️ TrustChain Notary Active: ${NOTARY_KEYPAIR.publicKey.toBase58()}`);
 
-// Mock function to fetch score from Integrity Engine
-async function fetchVerifiedScore(wallet: PublicKey): Promise<IntegrityScore> {
-  // In reality, this would call backend/integrityEngine.js logic
-  console.log(`Fetching score for ${wallet.toBase58()}...`);
+// IDL Definition
+const IDL: Idl = {
+  version: "0.1.0",
+  name: "trustchain_notary",
+  instructions: [
+    {
+      name: "updateIntegrity",
+      accounts: [
+        { name: "userIntegrity", isMut: true, isSigner: false },
+        { name: "user", isMut: false, isSigner: false },
+        { name: "notary", isMut: true, isSigner: true },
+        { name: "systemProgram", isMut: false, isSigner: false }
+      ],
+      args: [
+        { name: "giniScore", type: "u16" },
+        { name: "hhiScore", type: "u16" },
+        { name: "status", type: "u8" }
+      ]
+    }
+  ]
+};
 
-  // Simulated TemporalObserver data
-  const observerData: TemporalObserver = {
-    gini: 0.25,
-    hhi: 0.15,
-    syncIndex: 0.42 // Trigger Probationary Status (> 0.35)
-  };
+// Fetch Wallet Data Logic
+const fetchWalletData = async (address: string) => {
+  const pubKey = new PublicKey(address);
+  const signatures = await fetchWithRetry(() => connection.getSignaturesForAddress(pubKey, { limit: 15 }));
+  const transactions: any[] = [];
+  const positions: any[] = [];
 
-  const agent = new RiskAuditorAgent();
-  const decision = agent.evaluate(observerData);
+  console.log(`Fetched ${signatures.length} signatures.`);
 
-  console.log(`Agent Decision: ${decision.status} (Reason: ${decision.reason || 'None'})`);
-
-  return {
-    gini: observerData.gini,
-    hhi: observerData.hhi,
-    status: decision.status,
-    syncIndex: observerData.syncIndex
-  };
-}
-
-async function updateOnChainPDA(wallet: PublicKey, score: IntegrityScore) {
-  // Connect to devnet (or localnet)
-  const connection = new Connection("https://api.devnet.solana.com", "confirmed");
-
-  // PDA derivation: seeds = [b"integrity", user.key().as_ref()]
-  const [pda] = PublicKey.findProgramAddressSync(
-    [Buffer.from("config"), wallet.toBuffer()],
-    PROGRAM_ID
-  );
-
-  console.log(`PDA for wallet ${wallet.toBase58()}: ${pda.toBase58()}`);
-
-  // Calculate Discriminator for "global:update_integrity"
-  // Anchor uses sha256("global:<instruction_name>") and takes first 8 bytes
-  const discriminator = crypto.createHash("sha256").update("global:update_integrity").digest().subarray(0, 8);
-
-  const giniBuffer = Buffer.alloc(2);
-  giniBuffer.writeUInt16LE(Math.floor(score.gini * 10000)); // Scale by 10000
-
-  const hhiBuffer = Buffer.alloc(2);
-  hhiBuffer.writeUInt16LE(Math.floor(score.hhi * 10000)); // Scale by 10000
-
-  const statusBuffer = Buffer.alloc(1);
-  // status: VERIFIED = 1, PROBATIONARY = 2, ERROR = 0 (Example mapping)
-  let statusVal = 0;
-  if (score.status === 'VERIFIED') statusVal = 1;
-  else if (score.status === 'PROBATIONARY') statusVal = 2;
-
-  statusBuffer.writeUInt8(statusVal);
-
-  const data = Buffer.concat([discriminator, giniBuffer, hhiBuffer, statusBuffer]);
-
-  // Construct instruction
-  // Accounts must match the UpdateIntegrity struct in lib.rs:
-  // 1. user_integrity (PDA, mut)
-  // 2. user (Unchecked, not mut)
-  // 3. notary (Signer, mut)
-  // 4. system_program
-  const instruction = new TransactionInstruction({
-    keys: [
-      { pubkey: pda, isSigner: false, isWritable: true }, // user_integrity
-      { pubkey: wallet, isSigner: false, isWritable: false }, // user
-      { pubkey: NOTARY_KEYPAIR.publicKey, isSigner: true, isWritable: true }, // notary
-      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }, // system_program
-    ],
-    programId: PROGRAM_ID,
-    data: data,
-  });
-
-  const transaction = new Transaction().add(instruction);
-
-  // Sign transaction (Offline signing simulation)
-  // We need a recent blockhash to sign.
-  try {
-      const { blockhash } = await connection.getLatestBlockhash();
-      transaction.recentBlockhash = blockhash;
-  } catch (err) {
-      console.warn("Could not fetch blockhash (network issue?), using mock blockhash for simulation.");
-      transaction.recentBlockhash = Keypair.generate().publicKey.toBase58(); // Mock blockhash
-  }
-
-  transaction.feePayer = NOTARY_KEYPAIR.publicKey;
-  transaction.sign(NOTARY_KEYPAIR);
-
-  // ---------------------------------------------------------
-  // Ed25519 Verification Step
-  // ---------------------------------------------------------
-
-  // 1. Verify that the transaction object itself considers the signatures valid
-  if (!transaction.verifySignatures()) {
-      throw new Error("Transaction signature verification failed!");
-  }
-
-  // 2. Explicitly verify using nacl to ensure the Notary signed it
-  const signatureObj = transaction.signatures.find(s => s.publicKey.equals(NOTARY_KEYPAIR.publicKey));
-
-  if (!signatureObj || !signatureObj.signature) {
-      throw new Error("Notary signature missing from transaction");
-  }
-
-  const message = transaction.serializeMessage();
-  const isValid = nacl.sign.detached.verify(
-      message,
-      signatureObj.signature,
-      NOTARY_KEYPAIR.publicKey.toBuffer()
-  );
-
-  if (isValid) {
-      console.log("✅ Ed25519 Signature Verified: Update authorized by TrustChain Notary.");
-      console.log("Notary Public Key:", NOTARY_KEYPAIR.publicKey.toBase58());
-      console.log("Signature:", Buffer.from(signatureObj.signature).toString('hex'));
-  } else {
-      console.error("❌ Invalid Signature: Unauthorized update attempt.");
-      throw new Error("Security Violation: Invalid Signature");
-  }
-
-  console.log("Transaction successfully constructed with correct discriminator and accounts.");
-}
-
-async function main() {
+  for (const sigInfo of signatures) {
     try {
-        const score = await fetchVerifiedScore(MOCK_WALLET);
-        await updateOnChainPDA(MOCK_WALLET, score);
-    } catch (e) {
-        console.error("Error during notary sync:", e);
+      // Small delay to avoid rate limits
+      await new Promise(r => setTimeout(r, 200));
+      const tx = await fetchWithRetry(() => connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 }));
+      if (!tx || !tx.meta) continue;
+
+      const accountIndex = tx.transaction.message.accountKeys.findIndex((key: any) => key.pubkey.toBase58() === address);
+      if (accountIndex !== -1) {
+        const amount = Math.abs((tx.meta.preBalances[accountIndex] || 0) - (tx.meta.postBalances[accountIndex] || 0));
+        transactions.push({ amount });
+        positions.push({ value: amount });
+      }
+    } catch (err) {
+        console.warn(`Skipping tx ${sigInfo.signature}:`, err);
+        continue;
+    }
+  }
+  return { transactions, positions };
+};
+
+/**
+ * Executes the Notarization Sync
+ */
+async function syncNotary() {
+    try {
+        console.log("🔗 Connecting to Devnet...");
+        const balance = await connection.getBalance(NOTARY_KEYPAIR.publicKey);
+
+        if (balance < 10000000) { // 0.01 SOL
+            console.warn("⚠️ WARNING: Notary balance low. Transaction may fail.");
+        }
+
+        console.log(`✅ Ready to notarize for target: ${TARGET_WALLET.toBase58()}`);
+
+        // 1. Calculate Scores
+        const rawData = await fetchWalletData(TARGET_WALLET.toBase58());
+        const gini = calculateGini(rawData.transactions);
+        const hhi = calculateHHI(rawData.positions);
+
+        console.log(`📊 Integrity Scores - Gini: ${gini.toFixed(4)}, HHI: ${hhi.toFixed(4)}`);
+
+        // Convert to u16 (scaled by 10000)
+        const giniScore = Math.min(Math.floor(gini * 10000), 65535);
+        const hhiScore = Math.min(Math.floor(hhi * 10000), 65535);
+        // Status: 0=VERIFIED, 1=PROBATIONARY, 2=SYBIL
+        const status = gini > 0.9 ? 2 : (gini < 0.3 ? 0 : 1);
+        // Note: Logic reconciliation says > 0.90 is "high inequality" -> SYBIL/PROBATIONARY?
+        // User said: "ensure the 1.0 SOL vs 0.005 SOL delta triggers a high-inequality state (>0.90)."
+        // backend/integrityEngine.js says "gini > 0.7" => SYBIL.
+        // So > 0.90 is definitely SYBIL (2).
+
+        console.log(`📝 Notarizing: Gini=${giniScore}, HHI=${hhiScore}, Status=${status}`);
+
+        // 2. Setup Anchor Provider
+        const wallet = new Wallet(NOTARY_KEYPAIR);
+        const provider = new AnchorProvider(connection, wallet, { preflightCommitment: "confirmed" });
+        const program = new Program(IDL, PROGRAM_ID, provider);
+
+        // 3. Derive PDA
+        const [userIntegrityPda] = PublicKey.findProgramAddressSync(
+            [Buffer.from("config"), TARGET_WALLET.toBuffer()],
+            PROGRAM_ID
+        );
+
+        console.log(`🔐 PDA: ${userIntegrityPda.toBase58()}`);
+
+        // 4. Send Transaction
+        const tx = await program.methods
+            .updateIntegrity(giniScore, hhiScore, status)
+            .accounts({
+                userIntegrity: userIntegrityPda,
+                user: TARGET_WALLET,
+                notary: NOTARY_KEYPAIR.publicKey,
+                systemProgram: SystemProgram.programId,
+            })
+            .signers([NOTARY_KEYPAIR])
+            .rpc();
+
+        console.log(`✅ Notarization Complete! Signature: ${tx}`);
+
+    } catch (error) {
+        console.error("❌ Sync Failed:", error);
         process.exit(1);
     }
 }
 
-main();
+syncNotary();

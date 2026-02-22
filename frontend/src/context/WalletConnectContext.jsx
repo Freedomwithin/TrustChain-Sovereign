@@ -13,10 +13,15 @@ export const WalletConnectProvider = ({ children }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const connectWallet = useCallback(() => {
-    setAccount({ 
-      address: 'osmo1x5lmkv2f5a9m2pkksvx7ddxd6xyu3p7x5elq9n',
-      chainId: 'osmosis-1'
+  const connectWallet = useCallback((manualAddress = null) => {
+    // Use the passed address, or the Notary, or the Vercel Env
+    const demoAddress = manualAddress ||
+      import.meta.env.VITE_NOTARY_PUBLIC_KEY ||
+      '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5';
+
+    setAccount({
+      address: demoAddress,
+      chainId: 'solana-devnet'
     });
   }, []);
 
@@ -24,12 +29,7 @@ export const WalletConnectProvider = ({ children }) => {
     setAccount(null);
   }, []);
 
-  const value = {
-    account,
-    isReady,
-    connectWallet,
-    disconnectWallet,
-  };
+  const value = { account, isReady, connectWallet, disconnectWallet };
 
   return (
     <WalletConnectContext.Provider value={value}>

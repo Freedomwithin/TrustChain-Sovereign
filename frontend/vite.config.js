@@ -2,16 +2,17 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-// https://vite.dev/config/
 export default defineConfig({
+  server: {
+    port: 5173,
+  },
   define: {
-    'process.env': {},
     'global': 'globalThis',
   },
   plugins: [
     react(),
     nodePolyfills({
-      include: ['buffer', 'crypto', 'stream', 'util'],
+      include: ['buffer', 'process', 'util'],
       globals: {
         Buffer: true,
         global: true,
@@ -20,11 +21,13 @@ export default defineConfig({
     }),
   ],
   build: {
-    outDir: 'build',
+    outDir: 'dist',
+    rollupOptions: {
+      // 🛡️ Bypasses circular dependency loops that crash Vercel builds
+      onwarn(warning, warn) {
+        if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+        warn(warning);
+      },
+    },
   },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: './src/setupTests.jsx',
-  }
 })

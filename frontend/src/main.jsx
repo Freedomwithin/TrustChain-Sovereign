@@ -12,7 +12,7 @@ import './index.css';
 
 const WalletContext = ({ children }) => {
     // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
-    const endpoint = 'https://api.mainnet-beta.solana.com';
+    const endpoint = 'https://api.devnet.solana.com';
 
     const wallets = useMemo(
         () => [
