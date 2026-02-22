@@ -14,3 +14,52 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Standalone Setup
+
+This project is now a standalone UI repository.
+
+### Prerequisites
+
+- Node.js (v18+)
+- Yarn or NPM
+
+### Setup
+
+1.  Clone the repository:
+    ```bash
+    git clone <repo-url>
+    cd trustchain-frontend
+    ```
+
+2.  Install dependencies:
+    ```bash
+    yarn install
+    # or
+    npm install
+    ```
+
+3.  Configure Environment Variables:
+    Copy `.env.example` to `.env` and fill in the required values.
+    ```bash
+    cp .env.example .env
+    ```
+
+    - `VITE_BACKEND_URL`: URL of the TrustChain Backend (e.g., `https://trustchain-backend.vercel.app`).
+    - `SOLANA_RPC_URL`: Solana RPC Endpoint.
+    - `TRUSTCHAIN_PROGRAM_ID`: The Program ID of the TrustChain Anchor program.
+    - `NOTARY_SECRET`: (Server-side only) Secret key for the Notary wallet.
+
+### Development
+
+To start the development server:
+```bash
+yarn dev
+```
+
+### Build
+
+To build for production:
+```bash
+yarn build
+```

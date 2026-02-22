@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 
-const DEFAULT_API_URL = import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-backend.vercel.app';
+const DEFAULT_API_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL || 'https://trustchain-2-backend.vercel.app';
 
 /**
  * useTrustChain Hook
