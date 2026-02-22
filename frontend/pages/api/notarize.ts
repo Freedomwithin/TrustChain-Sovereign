@@ -1,13 +1,14 @@
-import { notarizeWallet } from '../../../backend/services/notaryService';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { notarizeWallet } from 'trustchain-backend/services/notaryService';
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
   if (!process.env.NOTARY_SECRET) {
     console.error('NOTARY_SECRET is not set');
-    return res.status(500).json({ error: 'Server configuration error' });
+    return res.status(500).json({ error: 'Notarization Failed' });
   }
 
   const { walletAddress } = req.body;
@@ -21,6 +22,6 @@ export default async function handler(req: any, res: any) {
     return res.status(200).json(result);
   } catch (error: any) {
     console.error('Notarization error:', error);
-    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    return res.status(500).json({ error: 'Notarization Failed' });
   }
 }
