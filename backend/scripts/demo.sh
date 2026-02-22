@@ -25,7 +25,7 @@ sleep 10
 
 # --- 4. THE "WAKE UP" ---
 echo "🛰️  Step 1: Pinging Ledger (Initial Airdrop)..."
-solana airdrop 1.5 6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5 --url devnet > /dev/null 2>&1
+solana airdrop 1.5 FBbjMhKtg1iyy83CeHaieqEFqw586i3WYG4zCcnXr7tc --url devnet > /dev/null 2>&1
 alert_user
 sleep 10
 

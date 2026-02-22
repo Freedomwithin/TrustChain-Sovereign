@@ -17,7 +17,7 @@ export const WalletConnectProvider = ({ children }) => {
     // Use the passed address, or the Notary, or the Vercel Env
     const demoAddress = manualAddress ||
       import.meta.env.VITE_NOTARY_PUBLIC_KEY ||
-      '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5';
+      'FBbjMhKtg1iyy83CeHaieqEFqw586i3WYG4zCcnXr7tc';
 
     setAccount({
       address: demoAddress,

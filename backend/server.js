@@ -80,7 +80,7 @@ app.get('/api/pool/:id/integrity', async (req, res) => {
       'JUP-SOL': { giniScore: 0.22, topHolders: 8, totalLiquidity: 1200000 },
       'RAY-SOL': { giniScore: 0.35, topHolders: 5, totalLiquidity: 300000 }
     };
-    const notaryAddr = process.env.NOTARY_PUBLIC_KEY || '6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5';
+    const notaryAddr = process.env.NOTARY_PUBLIC_KEY || 'FBbjMhKtg1iyy83CeHaieqEFqw586i3WYG4zCcnXr7tc';
     const balance = await connection.getBalance(new PublicKey(notaryAddr));
     const solBalance = balance / 1e9;
 

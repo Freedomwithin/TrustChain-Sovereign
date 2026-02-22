@@ -16,7 +16,7 @@ function WalletIntegrity() {
   let { giniScore, hhiScore, syncIndex, reason, latencyMs, status, loading, error } = useIntegrity();
 
   // --- 🛡️ INSTITUTIONAL DEMO OVERRIDE ---
-  const isDemoWallet = publicKey?.toBase58() === "6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5";
+  const isDemoWallet = publicKey?.toBase58() === "FBbjMhKtg1iyy83CeHaieqEFqw586i3WYG4zCcnXr7tc";
 
   if (isDemoWallet) {
     status = "VERIFIED";

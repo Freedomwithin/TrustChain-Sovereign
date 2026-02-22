@@ -97,10 +97,3 @@ const checkLpEligibility = async (fairScoreTier, walletEvents) => {
 
   return { eligible: true, gini };
 };
-
-module.exports = {
-  calculateGini,
-  calculateHHI,
-  calculateSyncIndex,
-  checkLpEligibility
-};
