@@ -60,7 +60,7 @@ try {
 const rpcUrl = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
 const connection = new Connection(rpcUrl, "confirmed");
 const TARGET_WALLET = new PublicKey("6QsEMrsHgnBB2dRVeySrGAi5nYy3eq35w4sywdis1xJ5");
-const PROGRAM_ID = new PublicKey("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+const PROGRAM_ID = new PublicKey(process.env.SOLANA_PROGRAM_ID || "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
 console.log(`🏛️ TrustChain Notary Active: ${NOTARY_KEYPAIR.publicKey.toBase58()}`);
 
@@ -78,8 +78,8 @@ const IDL: Idl = {
         { name: "systemProgram", isMut: false, isSigner: false }
       ],
       args: [
-        { name: "giniScore", type: "u16" },
-        { name: "hhiScore", type: "u16" },
+        { name: "gini_score", type: "u16" },
+        { name: "hhi_score", type: "u16" },
         { name: "status", type: "u8" }
       ]
     }

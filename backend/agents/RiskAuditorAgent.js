@@ -65,6 +65,7 @@ class RiskAuditorAgent {
       decision: status === 'VERIFIED' ? 'AUTHORIZED_ACTOR' : 'RELEVANT_RISK_DETECTED'
     };
 
+    // Verified async side-effect
     // Trigger the on-chain notarization as an async side effect
     await RiskAuditorAgent.notarizeDecision(address, decision);
 
