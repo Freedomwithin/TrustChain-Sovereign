@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['backend'],
+  transpilePackages: ['trustchain-backend'],
 };
 
 module.exports = nextConfig;
