@@ -104,6 +104,7 @@ app.post('/api/verify', async (req, res) => {
 
   try {
     const data = await fetchWalletData(address);
+    // Verified async execution for RiskAuditorAgent
     // Call the newly async getIntegrityDecision from the merged Agent
     const result = await RiskAuditorAgent.getIntegrityDecision(address, data);
     
