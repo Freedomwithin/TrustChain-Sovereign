@@ -7,6 +7,6 @@ echo "1. Testing Sentinel Logic (Backend)..."
 node backend/tests/sentinel.test.js
 
 echo "2. Testing Frontend Integrity..."
-yarn workspace trustchain-vite test run
+yarn workspace trustchain-frontend test run
 
 echo "✅ Sovereign Verification Complete."

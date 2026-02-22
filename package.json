@@ -9,7 +9,7 @@
     ],
     "scripts": {
         "setup:full": "./setup_full.sh",
-        "build:frontend": "yarn workspace trustchain-vite build",
+        "build:frontend": "yarn workspace trustchain-frontend build",
         "build:backend": "yarn workspace trustchain-backend build",
         "dev": "yarn workspaces foreach -Api run dev"
     },

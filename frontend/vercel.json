@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "buildCommand": "yarn workspace trustchain-vite build",
+  "buildCommand": "yarn workspace trustchain-frontend build",
   "outputDirectory": "dist",
-  "devCommand": "yarn workspace trustchain-vite dev",
+  "devCommand": "yarn workspace trustchain-frontend dev",
   "installCommand": "yarn install",
   "rewrites": [
     {
