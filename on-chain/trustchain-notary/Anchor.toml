@@ -6,14 +6,15 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-trustchain_notary = "5nbMQKE3kpUPpXRw7TdnReJDoeQfKBgLTnrfuENZn3Xe"
+trustchain_notary = "CvEK7knkMGSE4jw9HxNjHndxdChKW6XAxN4wThk3dkLT"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
 cluster = "devnet"
-wallet = "/home/freedomwithin/Documents/Tech/1_GitHub_Reops/TrustChain_documentation/Wallets-Testing/current_in_use_for_demo.json"
+# UPDATED: Using the space-free symbolic link
+wallet = "/home/freedomwithin/solana-keys/demo.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

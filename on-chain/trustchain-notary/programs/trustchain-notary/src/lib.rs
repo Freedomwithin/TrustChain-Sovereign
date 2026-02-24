@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("5nbMQKE3kpUPpXRw7TdnReJDoeQfKBgLTnrfuENZn3Xe");
+declare_id!("CvEK7knkMGSE4jw9HxNjHndxdChKW6XAxN4wThk3dkLT");
 
 #[program]
 pub mod trustchain_notary {

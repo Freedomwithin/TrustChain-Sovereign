@@ -2,7 +2,7 @@
 
 # TrustChain: Solana-Native Integrity Layer
 
-**Live Demo:** <a href="https://trustchain-sovereign-frontend.vercel.app/" target="_blank">Solana-Native Integrity Layer</a> (functional screenshot below)
+**Live Demo:** <a href="https://vimeo.com/1167869054" target="_blank">Solana-Native Integrity Layer</a> (functional screenshot below)
 
 **Status:** Live Fullstack MVP (Solana Mainnet/Testnet Ready)
 

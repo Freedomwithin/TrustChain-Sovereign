@@ -1,5 +1,5 @@
-const { calculateGini, calculateHHI, checkSyncIndex } = require('../services/integrityEngine');
-const { submitNotarization } = require('../utils/solanaBridge');
+import { calculateGini, calculateHHI, checkSyncIndex } from '../services/integrityEngine.js';
+import { submitNotarization } from '../utils/solanaBridge.js';
 
 class Configuration {
   // Sync Index: Lower = Human, Higher = Bot/Scripted
@@ -73,4 +73,4 @@ class RiskAuditorAgent {
   }
 }
 
-module.exports = { RiskAuditorAgent, Configuration };
+export { RiskAuditorAgent, Configuration };
